@@ -45,7 +45,7 @@ export default function Navbar() {
         <li><Link href="/#about" onClick={scrollToSection("about")}>About</Link></li>
       </ul>
     </div>
-    <Link href="/" onClick={scrollToTop} className="btn btn-ghost text-4xl ml-50 text-success font-(family-name:--font-aleo)">VerityAI™</Link>
+    <Link href="/" onClick={scrollToTop} className="btn btn-ghost text-4xl ml-50 text-success font-(family-name:--font-aleo)">VerityAI</Link>
     <ul className="menu menu-horizontal menu-lg px-1 ml-4 hidden lg:flex">
       <li><Link href="/#demo" onClick={scrollToSection("demo")}>Demo</Link></li>
       <li><Link href="/#about" onClick={scrollToSection("about")}>About</Link></li>

@@ -6,7 +6,7 @@ export default function Home() {
       <section className="hero relative min-h-[calc(100svh-4rem)]">
         <div className="hero-content text-center">
           <div className="max-w-lg -translate-y-32">
-            <h1 className="text-7xl font-bold">Detect AI Videos Easily™</h1>
+            <h1 className="text-7xl font-bold">Detect AI Videos Easily</h1>
             <p className="text-xl py-12">
               VerityAI detects minor inconsistencies in AI-generated videos that are difficult to spot by humans.
             </p>
