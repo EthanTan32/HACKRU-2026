@@ -27,7 +27,7 @@ function waveHeight(x: number, z: number, t: number) {
   return h;
 }
 
-const RIPPLES = 8;
+const RIPPLES = 5;
 const RIPPLE_LIFE = 3.5;
 const RIPPLE_SPEED = 7;
 
@@ -89,8 +89,8 @@ const waveVertex = /* glsl */ `
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
-    float size = max(2.0 + h * 0.5 + vGlow * 1.0 + vRing * 0.8, 0.5);
-    gl_PointSize = size * uPixelRatio * (24.0 / -mv.z);
+    float size = max(2.6 + h * 0.5 + vGlow * 1.0 + vRing * 0.8, 0.5);
+    gl_PointSize = min(size * (24.0 / -mv.z), 7.0) * uPixelRatio;
 
     vHeight = h;
     vDepth = -mv.z;
@@ -183,9 +183,13 @@ export default function Background() {
     if (!container) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const pixelRatio = Math.min(window.devicePixelRatio, 2);
+    const pixelRatio = Math.min(window.devicePixelRatio, 1.25);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: false,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
@@ -200,16 +204,16 @@ export default function Background() {
     const deep = new THREE.Vector3(0.02, 0.25, 0.22);
 
     // Wave field: a grid of points on the XZ plane
-    const cols = 180;
-    const rows = 120;
-    const spacing = 0.5;
+    const cols = 130;
+    const rows = 105;
+    const spacing = 0.7;
     const wavePositions = new Float32Array(cols * rows * 3);
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
         const idx = (i * rows + j) * 3;
         wavePositions[idx] = (i - cols / 2) * spacing;
         wavePositions[idx + 1] = 0;
-        wavePositions[idx + 2] = (j - rows / 2) * spacing - 10;
+        wavePositions[idx + 2] = (j - rows / 2) * spacing - 5;
       }
     }
     const ripples = Array.from({ length: RIPPLES }, () => new THREE.Vector4(0, 0, -100, 0));
@@ -234,7 +238,7 @@ export default function Background() {
     scene.add(new THREE.Points(waveGeometry, waveMaterial));
 
     // Floating dust motes, animated on the CPU so lines can connect to them
-    const dustCount = 240;
+    const dustCount = 160;
     const dustBase = new Float32Array(dustCount * 3);
     const dustSeeds = new Float32Array(dustCount);
     for (let i = 0; i < dustCount; i++) {
@@ -322,14 +326,35 @@ export default function Background() {
     const onPointerLeave = () => {
       lastMove = -10;
     };
+    // Offset the camera's view by the page scroll so the scene moves up with the content,
+    // and fade it out over the first screen of scrolling
+    let opacity = -1;
+    const followScroll = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.setViewOffset(w, h, 0, window.scrollY, w, h);
+      const fade = Math.round(Math.min(Math.max(1 - window.scrollY / (h * 0.8), 0), 1) * 100) / 100;
+      if (fade !== opacity) {
+        opacity = fade;
+        renderer.domElement.style.opacity = String(fade);
+      }
+      return fade > 0;
+    };
+    const onScroll = () => {
+      followScroll();
+      renderer.render(scene, camera);
+    };
+
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      if (reduceMotion) renderer.render(scene, camera);
+      if (reduceMotion) onScroll();
     };
     window.addEventListener("resize", onResize);
-    if (!reduceMotion) {
+    if (reduceMotion) {
+      window.addEventListener("scroll", onScroll, { passive: true });
+    } else {
       window.addEventListener("pointermove", onPointerMove);
       document.documentElement.addEventListener("pointerleave", onPointerLeave);
     }
@@ -396,6 +421,8 @@ export default function Background() {
 
     let frame = 0;
     const animate = () => {
+      frame = requestAnimationFrame(animate);
+      if (!followScroll()) return;
       const t = now();
 
       // Gentle camera parallax
@@ -406,7 +433,7 @@ export default function Background() {
       // Where the cursor lands on the wave plane
       raycaster.setFromCamera(pointer, camera);
       if (raycaster.ray.intersectPlane(plane, hit)) {
-        mouseTarget.set(hit.x, THREE.MathUtils.clamp(hit.z, -40, 20));
+        mouseTarget.set(hit.x, THREE.MathUtils.clamp(hit.z, -40, 30));
       }
       mouseWorld.lerp(mouseTarget, 0.12);
 
@@ -439,14 +466,13 @@ export default function Background() {
       updateLines();
 
       renderer.render(scene, camera);
-      frame = requestAnimationFrame(animate);
     };
 
     if (reduceMotion) {
       waveMaterial.uniforms.uTime.value = 4;
       dustMaterial.uniforms.uTime.value = 4;
       updateDust(4);
-      renderer.render(scene, camera);
+      onScroll();
     } else {
       animate();
     }
@@ -454,6 +480,7 @@ export default function Background() {
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       document.documentElement.removeEventListener("pointerleave", onPointerLeave);
       waveGeometry.dispose();

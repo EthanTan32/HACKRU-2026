@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Aleo, Google_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import Background from "@/components/background";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const googleSans = Google_Sans({
+  variable: "--font-google-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const aleo = Aleo({
+  variable: "--font-aleo",
   subsets: ["latin"],
 });
 
@@ -23,10 +23,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       data-theme="dark"
+      data-scroll-behavior="smooth"
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${googleSans.variable} ${aleo.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-(family-name:--font-google-sans)">
         <Background />
         <Navbar />
         {children}

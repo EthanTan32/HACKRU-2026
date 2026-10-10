@@ -1,6 +1,15 @@
+import Link from "next/link";
+
 export default function Navbar() {
     return (
-        <div className="navbar bg-base-100">
+        <div className="navbar sticky top-0 z-50">
+  {/* Gradient blur: stacked blur layers, each masked to fade out lower down */}
+  <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -bottom-8 -z-10">
+    <div className="absolute inset-0 backdrop-blur-sm mask-b-from-60% mask-b-to-100%" />
+    <div className="absolute inset-0 backdrop-blur-md mask-b-from-30% mask-b-to-75%" />
+    <div className="absolute inset-0 backdrop-blur-lg mask-b-from-0% mask-b-to-50%" />
+    <div className="absolute inset-0 bg-linear-to-b from-base-100/90 via-base-100/50 to-transparent" />
+  </div>
   <div className="navbar-start">
     <div className="dropdown">
       <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -20,9 +29,9 @@ export default function Navbar() {
         <li><a>Item 3</a></li>
       </ul>
     </div>
-    <a className="btn btn-ghost text-4xl ml-50 text-success">VerityAI</a>
+    <Link href="/" className="btn btn-ghost text-4xl ml-50 text-success font-(family-name:--font-aleo)">VerityAI</Link>
     <ul className="menu menu-horizontal menu-lg px-1 ml-4 hidden lg:flex">
-      <li><a>Demo</a></li>
+      <li><Link href="/#demo">Demo</Link></li>
       <li><a>About</a></li>
     </ul>
   </div>
