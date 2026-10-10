@@ -1,0 +1,496 @@
+{
+  "seed": 20261010,
+  "excluded_original_csv": "FrameTrace\\backend\\data\\genbuster_features.csv",
+  "configuration": {
+    "fps": 8,
+    "width": 384,
+    "max_frames": 240
+  },
+  "rows": [
+    {
+      "path": "real/74a78e08a26896931bb1de4af461516d7f604c84db8eb06b0e7a348080ad788c.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.07516534831553828,
+        "median_local_deformation": 0.04088000517883898,
+        "confidence": 0.662599951143059,
+        "valid_observations": 9280
+      }
+    },
+    {
+      "path": "real/8449b031905d38679360a06919bbd29199e08a30fe2254465f79896b00f077c7.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.0538222095850152,
+        "median_local_deformation": 0.02122727635818372,
+        "confidence": 0.9028632478632479,
+        "valid_observations": 22149
+      }
+    },
+    {
+      "path": "real/cfd644c1dcc6687edec0c71b8c670bf022dde6de76ceb5a0e42d3c9e2e12c6e2.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.10043785384411828,
+        "median_local_deformation": 0.015426475169480567,
+        "confidence": 0.8786228857210866,
+        "valid_observations": 10258
+      }
+    },
+    {
+      "path": "real/70f071d4a9dde6ba5942ffbb42aa4028e8547b915f98f23997587b32520ec360.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.1031724552731,
+        "median_local_deformation": 0.0428190501576721,
+        "confidence": 0.8826623065131741,
+        "valid_observations": 18661
+      }
+    },
+    {
+      "path": "real/112759abf5318e2df7562c5038de5840327bb7d3cbef0880a2a8f5c159b8ce8b.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.3366491949020584,
+        "median_local_deformation": 0.11193379748238518,
+        "confidence": 0.6395864199892919,
+        "valid_observations": 17322
+      }
+    },
+    {
+      "path": "real/217ced995073ea37bd1140244c6283e898b0fd01c1ae51b51ef0e8daee5c4fe8.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.34578909772095345,
+        "median_local_deformation": 0.1586518695956729,
+        "confidence": 0.6511965811965812,
+        "valid_observations": 18501
+      }
+    },
+    {
+      "path": "real/c50eb2fbeb451c779f2cbcec5fd0e29ff7dfaf1f4c9a03133468a8d6c423a38e.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 38,
+        "median_p90_relative_velocity_change": 0.545591385303011,
+        "median_local_deformation": 0.19843600220239843,
+        "confidence": 0.5409413893665552,
+        "valid_observations": 11307
+      }
+    },
+    {
+      "path": "real/584d59ff84a7effa313e48c36ee63ee09f9118912962958f89af094d17f2b8da.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.23678545255122344,
+        "median_local_deformation": 0.10217816438061154,
+        "confidence": 0.48809324774126256,
+        "valid_observations": 9803
+      }
+    },
+    {
+      "path": "real/8aea016b52910f97280929dec531f2bd0ef8c74beff917a1adfab810da541a7f.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.01937146182213856,
+        "median_local_deformation": 0.014386905378631822,
+        "confidence": 0.9964102564102566,
+        "valid_observations": 23327
+      }
+    },
+    {
+      "path": "real/d0d71f07651bf11763cae26807ef235b34cf57e4ab05db8d3ebcf4785f5f6741.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.16387724447681817,
+        "median_local_deformation": 0.06354883022923405,
+        "confidence": 0.8341148856341045,
+        "valid_observations": 10215
+      }
+    },
+    {
+      "path": "real/c859c13fb498b92afb10de615e3474bf38d00797e65405191adbe699f09b7678.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.26809041111769244,
+        "median_local_deformation": 0.11868821829683866,
+        "confidence": 0.7056136083285963,
+        "valid_observations": 11459
+      }
+    },
+    {
+      "path": "real/d734dbbf01970fa37a03b19c595b6c7ae5465db024ad5072cf8bf08fe6dc7145.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.12025649703739943,
+        "median_local_deformation": 0.07056789485887976,
+        "confidence": 0.8945448484658627,
+        "valid_observations": 13581
+      }
+    },
+    {
+      "path": "real/25f27bde5b6bd96c672f8cff4b79f84cb6eac25053494e30cf5ac5545a247947.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.013893998739283665,
+        "median_local_deformation": 0.013666434178529648,
+        "confidence": 0.9397845349192846,
+        "valid_observations": 5639
+      }
+    },
+    {
+      "path": "real/197040d81b2d71e2c02a09a8c23b0906d652e5523fd46cdca1d322c18c041e2e.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.37435235673447986,
+        "median_local_deformation": 0.13800127167403817,
+        "confidence": 0.6592977741637053,
+        "valid_observations": 5221
+      }
+    },
+    {
+      "path": "real/ef4e4029d106f127bab35392ac21f463478d431d1c7ec065de813bc983bb5554.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.21919355559348985,
+        "median_local_deformation": 0.09265283656994405,
+        "confidence": 0.8219978178263299,
+        "valid_observations": 9595
+      }
+    },
+    {
+      "path": "real/6a979b9217eb2ace5de1e5b9fa82406376c418d68af655cb3a5ea97b7d919d89.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.3476725590580777,
+        "median_local_deformation": 0.10057597929174307,
+        "confidence": 0.7152685490755646,
+        "valid_observations": 20579
+      }
+    },
+    {
+      "path": "real/3c2deca367e6503f1b3152be1449e19048b85607850582b394336358daceec3d.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.10232450585089646,
+        "median_local_deformation": 0.06029255144127259,
+        "confidence": 0.9039955165335297,
+        "valid_observations": 10576
+      }
+    },
+    {
+      "path": "real/330b8163a3171bf1eb6121580ba514efa2ea2e8475f69249c0004ce44e5c0f49.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.39654602673640627,
+        "median_local_deformation": 0.13188609920143213,
+        "confidence": 0.5743511331596114,
+        "valid_observations": 16330
+      }
+    },
+    {
+      "path": "real/c7872e03ce951464fcfd1afc5cdfdd76046f20cd6acde9e7c9d927c25ab663d8.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.20868523512849974,
+        "median_local_deformation": 0.09570068251198237,
+        "confidence": 0.7432645264347502,
+        "valid_observations": 7616
+      }
+    },
+    {
+      "path": "real/98f218103e2876701fa58489df3d8dea13bb8873d4524104b3ba917bd04747a6.mp4",
+      "label": 0,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.14330757813614586,
+        "median_local_deformation": 0.07003283359537027,
+        "confidence": 0.8399574469615755,
+        "valid_observations": 19568
+      }
+    },
+    {
+      "path": "fake/cogvideox/bf89f62200612e4eebf76b02c6be0fcf1b052ecbf2edeec6bb172eaeaa3bb364.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.11857337483048914,
+        "median_local_deformation": 0.07381119314960878,
+        "confidence": 0.7732478632478632,
+        "valid_observations": 21969
+      }
+    },
+    {
+      "path": "fake/ltxvideo/9410ff2461fa4b4e127c652ee96d2855321a06ded57a96c46d47dbcf4a8917d0.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.03933908699392493,
+        "median_local_deformation": 0.02169244878870328,
+        "confidence": 0.9559401709401709,
+        "valid_observations": 22935
+      }
+    },
+    {
+      "path": "fake/easyanimate/96e94e0a15d400a1c0911390397be7814b44b4eedf13861101d13ea755ffde18.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.014657173644666899,
+        "median_local_deformation": 0.01096081060133893,
+        "confidence": 0.9827069437535665,
+        "valid_observations": 16706
+      }
+    },
+    {
+      "path": "fake/easyanimate/4d43d1aec58d7f1da46630604ef6a7d5da46029f77817f211d180cf68148b01d.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.013915204445478094,
+        "median_local_deformation": 0.00852619512381511,
+        "confidence": 0.9949150945721599,
+        "valid_observations": 11095
+      }
+    },
+    {
+      "path": "fake/hunyuanvideo/ed2f45604b410b97958c2bfaa112a19c186aae299028e59c5a14715f71953c4c.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.06787507742391491,
+        "median_local_deformation": 0.04585131478015844,
+        "confidence": 0.9409077975918743,
+        "valid_observations": 13972
+      }
+    },
+    {
+      "path": "fake/ltxvideo/c165cf2ffff17b4cf7232a26890486d95eb56745564a7829d74e10db821c99b9.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.03873639627572104,
+        "median_local_deformation": 0.026155288637789015,
+        "confidence": 0.9662820512820515,
+        "valid_observations": 22674
+      }
+    },
+    {
+      "path": "fake/cogvideox/4a44554c080f983986f9e5eacf1fb5c61c9064af658d50d086e2b9cadb9f4ce3.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.034462623933636305,
+        "median_local_deformation": 0.018608913489534085,
+        "confidence": 0.9761538461538459,
+        "valid_observations": 22955
+      }
+    },
+    {
+      "path": "fake/easyanimate/46895fc874d0f664ceb4573e251746686dab6f7d4a3308fca252c5fe2284b6e5.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.013561650832309131,
+        "median_local_deformation": 0.007322958970317969,
+        "confidence": 0.9892150317398375,
+        "valid_observations": 20387
+      }
+    },
+    {
+      "path": "fake/cogvideox/688fbaff7ce846b736e59b8b991018b7208f27b09a51f4d865f6542351af1196.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.09935175295367953,
+        "median_local_deformation": 0.05797555170098545,
+        "confidence": 0.8265811965811966,
+        "valid_observations": 21559
+      }
+    },
+    {
+      "path": "fake/ltxvideo/55370385f00977de87c474b4113fff09fd14744d1e6bd9f88a2513e7b0aa5e4f.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.03749970010760375,
+        "median_local_deformation": 0.029174714274137637,
+        "confidence": 0.977900300184616,
+        "valid_observations": 14643
+      }
+    },
+    {
+      "path": "fake/hunyuanvideo/44ef3de0564f0c4065318cce43c676170b619a81cacc42cf800ec3681e8cfc4e.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.06397515702478937,
+        "median_local_deformation": 0.021924938208402984,
+        "confidence": 0.9048184595790121,
+        "valid_observations": 22071
+      }
+    },
+    {
+      "path": "fake/cogvideox/6afce0f51fced099378aa8e23b1588aeb40b4778b55b670979ce63a3cfcc30b1.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.03360745119263045,
+        "median_local_deformation": 0.017759828676263127,
+        "confidence": 0.9473076923076923,
+        "valid_observations": 23059
+      }
+    },
+    {
+      "path": "fake/easyanimate/dd54ce18887d862c8e777718c2e704d901e4f4a05acd5a99e56fe799407e1889.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.06905085004481382,
+        "median_local_deformation": 0.05450991447538292,
+        "confidence": 0.927675870274137,
+        "valid_observations": 8991
+      }
+    },
+    {
+      "path": "fake/cogvideox/009a5d921b7cd5b813bd1182e84a823378ef7dedbb5f04f28e03f1c94e7f6c60.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.06143801016304773,
+        "median_local_deformation": 0.03230291168803521,
+        "confidence": 0.8882641252552759,
+        "valid_observations": 22249
+      }
+    },
+    {
+      "path": "fake/cogvideox/a45194a4f10395c6edae3ed89c3ad820876e15b09ed13ed74cca1c85485740f9.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.04431642625135977,
+        "median_local_deformation": 0.018184958772948217,
+        "confidence": 0.9608119658119659,
+        "valid_observations": 22936
+      }
+    },
+    {
+      "path": "fake/easyanimate/1cfb4771a0b9c201dfdb9ef7a8eb608849043fceacb9583884e99ab023ea1816.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.01548577291064741,
+        "median_local_deformation": 0.011352826124795918,
+        "confidence": 0.98465811965812,
+        "valid_observations": 23090
+      }
+    },
+    {
+      "path": "fake/ltxvideo/1f94192a964935d897e1c2318c5ae75f445df156773bb1d5f7851ae98cd6b63f.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.0539674184395653,
+        "median_local_deformation": 0.03492375822297018,
+        "confidence": 0.9002266561652229,
+        "valid_observations": 22323
+      }
+    },
+    {
+      "path": "fake/cogvideox/0ece8aa45d5f107dd614574484489f9f3c942ef7279eeabd01700d83e40c953d.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.042811692344958525,
+        "median_local_deformation": 0.024884493267840806,
+        "confidence": 0.9486519948244893,
+        "valid_observations": 15005
+      }
+    },
+    {
+      "path": "fake/easyanimate/a3889484023a34f962efc21aab4ff4470fa3890a33a9a4ae85052f43a27ecb89.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.03043007445114103,
+        "median_local_deformation": 0.01751978327778947,
+        "confidence": 0.9447435897435897,
+        "valid_observations": 22560
+      }
+    },
+    {
+      "path": "fake/easyanimate/20419647b5f564cb64454c6a3146f42fb5f5d606840ed2c3f0cdcf04f0c6c329.mp4",
+      "label": 1,
+      "status": "ok",
+      "metrics": {
+        "triplets_analyzed": 39,
+        "median_p90_relative_velocity_change": 0.006126180660090715,
+        "median_local_deformation": 0.004467351262061837,
+        "confidence": 0.9908547008547006,
+        "valid_observations": 23186
+      }
+    }
+  ],
+  "usable_count": 40,
+  "total_count": 40,
+  "limitation": "Motion-only exploratory evaluation. No learned classifier, no source-group metadata; no full-system generalization claim.",
+  "raw_local_deformation_auroc": 0.16999999999999998,
+  "raw_acceleration_auroc": 0.1125
+}

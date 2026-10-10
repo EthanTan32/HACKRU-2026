@@ -1,0 +1,79 @@
+import traceback
+from .video import sample_frames
+from .visualizations import save_visuals
+from .config import STORAGE_DIR
+from .store import update_job, get_job
+from .detectors import background, flow, text, depth, appearance, face
+from .preprocessing import profiles, contract
+import cv2
+from pathlib import Path
+from .detectors.common import response
+from .classifier import maybe_predict
+
+DETECTORS = [
+    ('text_consistency', text.analyze),
+    ('background_motion', background.analyze),
+    ('depth_consistency', depth.analyze),
+    ('optical_flow', flow.analyze),
+    ('color_consistency', appearance.analyze),
+    ('facial_consistency', face.analyze),
+]
+
+
+def analyze_file(path, artifact_dir=None, sampling=None, analyzer_cache=None):
+    if artifact_dir is not None:
+        artifact_dir = Path(artifact_dir)
+    outputs = {}
+    saved_artifacts = []
+    counts = {}
+    for name, function in DETECTORS:
+        try:
+            cached = analyzer_cache(name, None) if analyzer_cache else None
+            if cached is not None and artifact_dir is None:
+                outputs[name] = cached
+                continue
+            frames, metadata = sample_frames(path, **profiles(sampling)[name])
+            counts[name] = len(frames)
+            outputs[name] = function(frames)
+            outputs[name]['sampling'] = profiles(sampling)[name]
+            overlay = outputs[name].pop('_overlay', None)
+            if analyzer_cache:
+                analyzer_cache(name, outputs[name])
+            if artifact_dir is not None:
+                artifact_dir.mkdir(parents=True, exist_ok=True)
+                if overlay is not None and cv2.imwrite(str(artifact_dir / f'{name}_evidence.jpg'), overlay):
+                    saved_artifacts.append(f'{name}_evidence')
+                if name == 'color_consistency':
+                    saved_artifacts.extend(save_visuals(frames, artifact_dir))
+        except Exception as exc:
+            outputs[name] = response(name, 'error', note=f'{type(exc).__name__}: {exc}')
+    from .anomaly_calibration import apply
+    for output in outputs.values():
+        apply(output)
+    from .video import inspect_video
+    metadata = inspect_video(path, max_duration_seconds=(sampling or {}).get('max_duration_seconds',180))
+    timeline = sorted([dict(event, detector=name)
+                       for name, result in outputs.items() for event in result['events']],
+                      key=lambda event: event['timestamp'])
+    result = {
+        'extraction_config': contract(sampling),
+        'artifacts': saved_artifacts,
+        'video': {'duration_seconds': round(metadata['duration'], 3), 'fps': round(metadata['fps'], 2),
+                  'sampled_frames': max(counts.values(), default=0), 'analyzer_frames': counts},
+        'detectors': outputs, 'timeline': timeline,
+    }
+    result.update(maybe_predict(result))
+    return result
+
+
+def analyze_job(job_id):
+    job = get_job(job_id)
+    if job is None:
+        return
+    try:
+        update_job(job_id, status='running')
+        result = analyze_file(job['path'], STORAGE_DIR / 'artifacts' / job_id)
+        update_job(job_id, status='completed', result=result)
+    except Exception as exc:
+        traceback.print_exc()
+        update_job(job_id, status='failed', error=f'{type(exc).__name__}: {exc}')

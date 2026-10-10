@@ -1,0 +1,7 @@
+video_path,source_id,generator,split
+real/camera_001.mp4,source_001,camera,train
+fake/generator_a/generated_001.mp4,source_001,generator_a,train
+real/camera_002.mp4,source_002,camera,val
+fake/generator_a/generated_002.mp4,source_002,generator_a,val
+real/camera_003.mp4,source_003,camera,test
+fake/generator_b/generated_003.mp4,source_003,generator_b,test
