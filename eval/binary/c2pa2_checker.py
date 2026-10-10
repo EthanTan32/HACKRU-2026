@@ -2,6 +2,7 @@
 """
 Bare Minimum C2PA Parser & Validator
 Extracts C2PA manifest/header and validates integrity with c2patool / c2pa SDK.
+Completely standalone: zero dependencies on detector, logo_detector, cv2, or numpy.
 
 Return codes:
  -1 : Unable to open the file
@@ -42,8 +43,9 @@ def format_uuid(uuid_bytes: bytes) -> str:
 
 def extract_c2pa(file_path: str) -> Optional[bytes]:
     """
-    Bare-minimum parser extracting the raw C2PA manifest/box from container.
+    Bare-minimum parser extracting raw C2PA manifest/box payload from container.
     Traverses ISO-BMFF boxes and scans for JUMBF/EBML manifests.
+    Zero external dependencies.
     """
     try:
         with open(file_path, "rb") as f:
@@ -228,7 +230,7 @@ class C2PAChecker:
         }
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2:
         print("Usage: python c2pa2_checker.py <video_path>")
         sys.exit(1)
@@ -236,3 +238,7 @@ if __name__ == "__main__":
     result = check_c2pa(sys.argv[1])
     print(result)
     sys.exit(0 if result == 0 else (1 if result == 1 else 255))
+
+
+if __name__ == "__main__":
+    main()

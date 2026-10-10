@@ -9,8 +9,12 @@ try:
     from .c2pa2_checker import check_c2pa
     from .logo_detector import LogoDetector
 except ImportError:
-    from eval.binary.c2pa2_checker import check_c2pa
-    from eval.binary.logo_detector import LogoDetector
+    try:
+        from c2pa2_checker import check_c2pa
+        from logo_detector import LogoDetector
+    except ImportError:
+        from eval.binary.c2pa2_checker import check_c2pa
+        from eval.binary.logo_detector import LogoDetector
 
 
 def detect(
