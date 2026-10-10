@@ -68,9 +68,9 @@ export default function Home() {
         <div className="max-w-3xl text-center">
           <h2 className="text-5xl font-bold">About VerityAI</h2>
           <p className="text-lg mt-6 opacity-70">
-            AI-generated video is getting harder to tell apart from the real thing. VerityAI looks past what
-            your eyes catch and checks a video frame by frame for the small inconsistencies that generation
-            models leave behind.
+            AI-generated video gets harder to differentiate day by day. VerityAI looks past what
+            your eyes see and observes how the depth map of a video changes each frame to discover the small inconsistencies left behind by generation
+            models.
           </p>
         </div>
 
@@ -107,15 +107,15 @@ export default function Home() {
 const steps = [
   {
     title: "Upload",
-    body: "Drop in any video clip. It plays right in your browser so you can check you picked the right one.",
+    body: "Drop in any suspicious video clip.",
   },
   {
     title: "Analyze",
-    body: "Our model scans the video frame by frame, comparing motion, lighting and fine detail over time.",
+    body: "Our model scans the video frame by frame, finding anomalous features, movement, and lighting in the video.",
   },
   {
     title: "Get a verdict",
-    body: "See how likely the video is to be AI-generated, along with the moments that raised a flag.",
+    body: "See how likely the video is to be AI-generated, along with the exact moments that raised a flag.",
   },
 ];
 
@@ -124,5 +124,5 @@ const signals = [
   "Lighting mismatches",
   "Warping textures",
   "Flickering details",
-  "Inconsistent faces",
+  "Distorted text",
 ];
