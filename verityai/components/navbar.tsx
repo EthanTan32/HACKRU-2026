@@ -1,6 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { MouseEvent } from "react";
 
 export default function Navbar() {
+    const pathname = usePathname();
+
+    // On the home page, the logo scrolls back to the top instead of reloading the page
+    const scrollToTop = (e: MouseEvent<HTMLAnchorElement>) => {
+        if (pathname !== "/") return;
+        e.preventDefault();
+        window.scrollTo({ top: 0 });
+        history.replaceState(null, "", "/");
+    };
+
+    // Next's <Link> ignores a click when the URL already has the same #hash,
+    // so on the home page scroll to the section ourselves every time
+    const scrollToSection = (id: string) => (e: MouseEvent<HTMLAnchorElement>) => {
+        if (pathname !== "/") return;
+        e.preventDefault();
+        document.getElementById(id)?.scrollIntoView();
+        history.replaceState(null, "", `/#${id}`);
+    };
+
     return (
         <div className="navbar sticky top-0 z-50">
   {/* Gradient blur: stacked blur layers, each masked to fade out lower down */}
@@ -18,21 +41,14 @@ export default function Navbar() {
       <ul
         tabIndex={-1}
         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        <li><a>Item 1</a></li>
-        <li>
-          <a>Parent</a>
-          <ul className="p-2">
-            <li><a>Submenu 1</a></li>
-            <li><a>Submenu 2</a></li>
-          </ul>
-        </li>
-        <li><a>Item 3</a></li>
+        <li><Link href="/#demo" onClick={scrollToSection("demo")}>Demo</Link></li>
+        <li><Link href="/#about" onClick={scrollToSection("about")}>About</Link></li>
       </ul>
     </div>
-    <Link href="/" className="btn btn-ghost text-4xl ml-50 text-success font-(family-name:--font-aleo)">VerityAI</Link>
+    <Link href="/" onClick={scrollToTop} className="btn btn-ghost text-4xl ml-50 text-success font-(family-name:--font-aleo)">VerityAI™</Link>
     <ul className="menu menu-horizontal menu-lg px-1 ml-4 hidden lg:flex">
-      <li><Link href="/#demo">Demo</Link></li>
-      <li><a>About</a></li>
+      <li><Link href="/#demo" onClick={scrollToSection("demo")}>Demo</Link></li>
+      <li><Link href="/#about" onClick={scrollToSection("about")}>About</Link></li>
     </ul>
   </div>
   <div className="navbar-end">

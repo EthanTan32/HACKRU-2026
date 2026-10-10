@@ -2,3 +2,26 @@
 @plugin "daisyui" {
   themes: dark --default;
 }
+
+/* Demo glows: slow pulse (animate-pulse-slow) and wandering paths for the side glows (animate-drift-2/3) */
+@theme {
+  --animate-pulse-slow: pulse-slow 6s ease-in-out infinite;
+  --animate-drift-2: drift-2 22s ease-in-out infinite;
+  --animate-drift-3: drift-3 26s ease-in-out infinite;
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes drift-2 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(10rem, 6rem); }
+    50% { transform: translate(4rem, 12rem); }
+    75% { transform: translate(-4rem, 4rem); }
+  }
+  @keyframes drift-3 {
+    0%, 100% { transform: translate(0, 0); }
+    30% { transform: translate(-10rem, -6rem); }
+    60% { transform: translate(-4rem, -12rem); }
+  }
+}

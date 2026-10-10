@@ -89,7 +89,7 @@ const waveVertex = /* glsl */ `
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
-    float size = max(2.6 + h * 0.5 + vGlow * 1.0 + vRing * 0.8, 0.5);
+    float size = max(3.0 + h * 0.5 + vGlow * 1.0 + vRing * 0.8, 0.5);
     gl_PointSize = min(size * (24.0 / -mv.z), 7.0) * uPixelRatio;
 
     vHeight = h;
@@ -121,7 +121,7 @@ const waveFragment = /* glsl */ `
 
     // Fade with distance so the field dissolves into the page
     float fog = smoothstep(70.0, 12.0, vDepth);
-    float alpha = (0.25 + k * 0.45 + vGlow * 0.3 + vRing * 0.35 + vScan * 0.2) * 0.9;
+    float alpha = (0.25 + k * 0.45 + vGlow * 0.3 + vRing * 0.35 + vScan * 0.2) * 1.15;
     gl_FragColor = vec4(color, soft * fog * alpha * vTwinkle);
   }
 `;
