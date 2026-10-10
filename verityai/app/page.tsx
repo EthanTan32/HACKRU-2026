@@ -68,7 +68,10 @@ export default function Home() {
       <section id="about" className="flex flex-col items-center gap-16 px-4 py-32">
         <div className="flex max-w-3xl flex-col items-center text-center">
           <Image src="/logo.svg" alt="VerityAI logo" width={96} height={96} className="mb-8 size-24" />
-          <h2 className="text-5xl font-bold">About VerityAI</h2>
+          <h2 className="text-5xl font-bold">
+            About{" "}
+            <span className="text-success font-semibold font-(family-name:--font-aleo)">VerityAI</span>
+          </h2>
           <p className="text-lg mt-6 opacity-70">
             AI-generated video gets harder to differentiate day by day. VerityAI looks past what
             your eyes see and observes how the depth map of a video changes each frame to discover the small inconsistencies left behind by generation
@@ -116,7 +119,7 @@ const steps = [
     body: "Our model scans the video frame by frame, finding anomalous features, movement, and lighting in the video.",
   },
   {
-    title: "Get a verdict",
+    title: "Receive verdict",
     body: "See how likely the video is to be AI-generated, along with the exact moments that raised a flag.",
   },
 ];
