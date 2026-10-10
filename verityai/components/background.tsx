@@ -27,9 +27,9 @@ function waveHeight(x: number, z: number, t: number) {
   return h;
 }
 
-const RIPPLES = 5;
-const RIPPLE_LIFE = 3.5;
-const RIPPLE_SPEED = 7;
+const RIPPLES = 16;
+const RIPPLE_LIFE = 4.5;
+const RIPPLE_SPEED = 3.9;
 
 const waveVertex = /* glsl */ `
   uniform float uTime;
@@ -59,9 +59,10 @@ const waveVertex = /* glsl */ `
     // Cursor: raise a glowing mound and push points slightly outward
     vec2 dir = p.xz - uMouse;
     float dm = length(dir);
-    float infl = exp(-dm * dm * 0.05) * uStrength;
-    h += infl * 1.2;
-    if (dm > 0.001) p.xz += dir / dm * exp(-dm * dm * 0.08) * uStrength * 0.5;
+    float infl = exp(-dm * dm * 0.038) * uStrength;
+    h += infl * 0.48;
+    // Smooth push (zero at the center) so points never flip sides as the cursor passes
+    p.xz += dir * exp(-dm * dm * 0.08) * uStrength * 0.14;
     vGlow = infl;
 
     // Ripples left by cursor movement
@@ -71,7 +72,9 @@ const waveVertex = /* glsl */ `
       float age = t - r.z;
       if (age < 0.0 || age > ${RIPPLE_LIFE.toFixed(1)}) continue;
       float front = distance(position.xz, r.xy) - age * ${RIPPLE_SPEED.toFixed(1)};
-      float ring = exp(-front * front * 0.35) * (1.0 - age / ${RIPPLE_LIFE.toFixed(1)});
+      // Ease each ring in so new ones don't pop into view
+      float ring = exp(-front * front * 0.17) * (1.0 - age / ${RIPPLE_LIFE.toFixed(1)})
+                 * smoothstep(0.0, 0.5, age);
       h += ring * r.w;
       vRing += ring * min(r.w, 1.5);
     }
@@ -89,7 +92,7 @@ const waveVertex = /* glsl */ `
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
-    float size = max(3.0 + h * 0.5 + vGlow * 1.0 + vRing * 0.8, 0.5);
+    float size = max(3.1 + h * 0.35 + vGlow * 0.4 + vRing * 0.4, 0.5);
     gl_PointSize = min(size * (24.0 / -mv.z), 7.0) * uPixelRatio;
 
     vHeight = h;
@@ -116,12 +119,12 @@ const waveFragment = /* glsl */ `
     // Crests glow brighter green, troughs sink into a deep teal
     float k = clamp((vHeight + 2.0) / 4.0, 0.0, 1.0);
     vec3 color = mix(uDeep, uColor, k);
-    color = mix(color, uColor, vGlow * 0.4);
-    color += uColor * (vRing * 0.25 + vScan * 0.15);
+    color = mix(color, uColor, vGlow * 0.16);
+    color += uColor * (vRing * 0.12 + vScan * 0.15);
 
     // Fade with distance so the field dissolves into the page
     float fog = smoothstep(70.0, 12.0, vDepth);
-    float alpha = (0.25 + k * 0.45 + vGlow * 0.3 + vRing * 0.35 + vScan * 0.2) * 1.15;
+    float alpha = (0.38 + k * 0.34 + vGlow * 0.12 + vRing * 0.16 + vScan * 0.2) * 1.15;
     gl_FragColor = vec4(color, soft * fog * alpha * vTwinkle);
   }
 `;
@@ -139,8 +142,8 @@ const dustVertex = /* glsl */ `
     gl_Position = projectionMatrix * mv;
     // Specks near the cursor brighten slightly
     float near = exp(-pow(distance(position, uCursor), 2.0) * 0.03) * uStrength;
-    gl_PointSize = (3.0 + aSeed * 4.0 + near * 1.5) * uPixelRatio * (20.0 / -mv.z);
-    vAlpha = 0.15 + 0.3 * abs(sin(uTime * (0.5 + aSeed) + aSeed * 10.0)) + near * 0.25;
+    gl_PointSize = (3.0 + aSeed * 4.0 + near * 0.65) * uPixelRatio * (20.0 / -mv.z);
+    vAlpha = 0.15 + 0.3 * abs(sin(uTime * (0.5 + aSeed) + aSeed * 10.0)) + near * 0.1;
   }
 `;
 
@@ -201,7 +204,7 @@ export default function Background() {
     camera.lookAt(0, 0, -10);
 
     const green = themeColor("--color-success", "oklch(76% 0.177 163.223)");
-    const deep = new THREE.Vector3(0.02, 0.25, 0.22);
+    const deep = new THREE.Vector3(0.05, 0.38, 0.32);
 
     // Wave field: a grid of points on the XZ plane
     const cols = 130;
@@ -408,7 +411,7 @@ export default function Background() {
               push(
                 dustPositions[i], dustPositions[i + 1], dustPositions[i + 2],
                 dustPositions[j], dustPositions[j + 1], dustPositions[j + 2],
-                (1 - d / 5) * 0.15 * strength,
+                (1 - d / 5) * 0.065 * strength,
               );
             }
           }
@@ -419,40 +422,47 @@ export default function Background() {
       lineAlphaAttr.needsUpdate = true;
     };
 
+    // Frame-rate independent easing: fraction to move this frame for a given rate per second
+    const ease = (rate: number, dt: number) => 1 - Math.exp(-rate * dt);
+
     let frame = 0;
+    let lastT = now();
     const animate = () => {
       frame = requestAnimationFrame(animate);
       if (!followScroll()) return;
       const t = now();
+      const dt = Math.min(t - lastT, 0.1);
+      lastT = t;
 
-      // Gentle camera parallax
-      camera.position.x += (pointer.x * 3 - camera.position.x) * 0.03;
-      camera.position.y += (7 + pointer.y * 1.5 - camera.position.y) * 0.03;
-      camera.lookAt(0, 0, -10);
-
-      // Where the cursor lands on the wave plane
+      // Where the cursor lands on the wave surface: start from the flat plane,
+      // then refine against the actual wave height so the mound sits under the cursor
       raycaster.setFromCamera(pointer, camera);
+      plane.constant = 0;
+      for (let i = 0; i < 3; i++) {
+        if (!raycaster.ray.intersectPlane(plane, hit)) break;
+        plane.constant = -(waveHeight(hit.x, hit.z, t) + 0.48 * strength);
+      }
       if (raycaster.ray.intersectPlane(plane, hit)) {
         mouseTarget.set(hit.x, THREE.MathUtils.clamp(hit.z, -40, 30));
       }
-      mouseWorld.lerp(mouseTarget, 0.12);
+      mouseWorld.lerp(mouseTarget, ease(2.8, dt));
 
       // Fade the interaction in while the cursor is active, out when idle
       const active = t - lastMove < 2.5 ? 1 : 0;
-      strength += (active - strength) * 0.05;
+      strength += (active - strength) * ease(1.7, dt);
 
       // Leave a trail of small ripples while moving
       if (
         active &&
-        t - lastRipple > 0.12 &&
+        t - lastRipple > 0.3 &&
         mouseWorld.distanceTo(lastRipplePos) > 1.5
       ) {
-        addRipple(mouseWorld.x, mouseWorld.y, 0.3);
+        addRipple(mouseWorld.x, mouseWorld.y, 0.12);
         lastRipple = t;
         lastRipplePos.copy(mouseWorld);
       }
 
-      const surface = waveHeight(mouseWorld.x, mouseWorld.y, t) + 1.2 * strength;
+      const surface = waveHeight(mouseWorld.x, mouseWorld.y, t) + 0.48 * strength;
       cursor.set(mouseWorld.x, surface + 1.4, mouseWorld.y);
 
       waveMaterial.uniforms.uTime.value = t;
