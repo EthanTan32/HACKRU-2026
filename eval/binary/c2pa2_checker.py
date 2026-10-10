@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 """
-Bare-Minimum C2PA Checker
-Maximises use of external libraries (c2pa-python SDK and c2patool CLI) to extract
-and validate C2PA manifests without any manual binary parsing or internal dependencies.
-
-Standalone: Can be executed directly or imported without detector.py.
+C2PA Checker
 
 Return Codes:
- -1 : Unable to open the file (missing, unreadable, or empty)
-  0 : Video is fine and C2PA is cryptographically validated
+ -1 : Unable to open the file
+  0 : Video is fine and C2PA is validated
   1 : No header / header could not be confirmed / header hash mismatch
 """
 
@@ -48,7 +44,7 @@ def validate_with_c2patool(file_path: str) -> bool:
     Validates C2PA cryptographic signature, manifest, and hash integrity
     using the external c2patool CLI or the official c2pa Python SDK.
     """
-    # 1. External c2patool CLI (if installed on PATH)
+    # 1. External c2patool CLI 
     c2pa_bin = shutil.which("c2patool")
     if c2pa_bin:
         try:
@@ -124,24 +120,6 @@ def check_c2pa(file_path: str) -> int:
 
     # Header exists but could not be confirmed / signature or hash mismatch
     return 1
-
-
-class C2PAChecker:
-    """Compatibility adapter class."""
-
-    def __init__(self, debug: bool = False):
-        self.debug = debug
-
-    def check_file(self, file_path: str) -> Dict[str, Any]:
-        code = check_c2pa(file_path)
-        manifest = extract_c2pa(file_path)
-        return {
-            "c2pa_present": manifest is not None or code == 0,
-            "status_code": code,
-            "manifest": manifest,
-            "validated": code == 0,
-        }
-
 
 def main():
     if len(sys.argv) < 2:
