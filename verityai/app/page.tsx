@@ -1,3 +1,4 @@
+import Image from "next/image";
 import UploadDemo from "@/components/upload-demo";
 
 export default function Home() {
@@ -65,7 +66,8 @@ export default function Home() {
       </section>
 
       <section id="about" className="flex flex-col items-center gap-16 px-4 py-32">
-        <div className="max-w-3xl text-center">
+        <div className="flex max-w-3xl flex-col items-center text-center">
+          <Image src="/logo.svg" alt="VerityAI logo" width={96} height={96} className="mb-8 size-24" />
           <h2 className="text-5xl font-bold">About VerityAI</h2>
           <p className="text-lg mt-6 opacity-70">
             AI-generated video gets harder to differentiate day by day. VerityAI looks past what
@@ -122,7 +124,7 @@ const steps = [
 const signals = [
   "Unnatural motion",
   "Lighting mismatches",
-  "Warping textures",
   "Flickering details",
   "Distorted text",
+  "Inconsistent faces"
 ];
