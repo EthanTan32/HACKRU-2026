@@ -1,0 +1,5 @@
+video_path,label,source_id,split,generator
+videos/real1.mp4,0,camera_original_001,train,camera
+videos/ai1.mp4,1,generator_clip_001,train,example_generator
+videos/real2.mp4,0,camera_original_002,test,camera
+videos/ai2.mp4,1,generator_clip_002,test,heldout_generator

@@ -1,0 +1,5 @@
+# Install only if enabling depth and/or OCR. First run downloads model checkpoints.
+transformers>=4.44,<5
+torch>=2.3
+paddleocr>=3.0,<4
+paddlepaddle>=3.0

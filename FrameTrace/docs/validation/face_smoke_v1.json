@@ -1,0 +1,417 @@
+{
+  "name": "facial_consistency",
+  "status": "ok",
+  "anomaly_index": null,
+  "events": [],
+  "metrics": {
+    "valid_observations": 40,
+    "median_shape_residual": 0.0021495105394794406,
+    "median_eye_aperture": 0.1827707315260614,
+    "median_mouth_opening": 0.007616581096543642,
+    "median_local_flow_residual": 0.0040716345758462875,
+    "confidence": 1.0
+  },
+  "note": "Pose-normalized stable facial geometry; eyes/mouth are expression covariates. No identity recognition. Raw measurements require validation calibration.",
+  "segments": [
+    {
+      "timestamp": 0.125,
+      "raw_value": 0.001912167721727731,
+      "eye_aperture": 0.19589230243038133,
+      "mouth_opening": 0.0057567223421515845,
+      "pose_change_radians": 0.022861240431666374,
+      "local_flow_residual": 0.004422763173120708,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 0.25,
+      "raw_value": 0.0007514893267957938,
+      "eye_aperture": 0.20999845118796445,
+      "mouth_opening": 0.007224748267649813,
+      "pose_change_radians": 0.027820076793432236,
+      "local_flow_residual": 0.0020287803671101717,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 0.375,
+      "raw_value": 0.002173169826878215,
+      "eye_aperture": 0.2209181765461803,
+      "mouth_opening": 0.004278939761286228,
+      "pose_change_radians": 0.01342561561614275,
+      "local_flow_residual": 0.0034884287512201495,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 0.5,
+      "raw_value": 0.003984972769792565,
+      "eye_aperture": 0.2148049698680479,
+      "mouth_opening": 0.004095902315707517,
+      "pose_change_radians": 0.020704876631498337,
+      "local_flow_residual": 0.006660158263054128,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 0.625,
+      "raw_value": 0.002593156485286678,
+      "eye_aperture": 0.21767216578431028,
+      "mouth_opening": 0.003925053125566492,
+      "pose_change_radians": 0.005393249448388815,
+      "local_flow_residual": 0.004082241375973605,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 0.75,
+      "raw_value": 0.0012809981788712162,
+      "eye_aperture": 0.192654667191728,
+      "mouth_opening": 0.002582045502301271,
+      "pose_change_radians": 0.020180009305477142,
+      "local_flow_residual": 0.0039018026139345293,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 0.875,
+      "raw_value": 0.0033080169194504095,
+      "eye_aperture": 0.22081134500293953,
+      "mouth_opening": 0.006345712150677526,
+      "pose_change_radians": 0.019786259159445763,
+      "local_flow_residual": 0.0054035051398898006,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.0,
+      "raw_value": 0.002332803804210527,
+      "eye_aperture": 0.19454947029804662,
+      "mouth_opening": 0.005414874048235449,
+      "pose_change_radians": 0.004931403789669275,
+      "local_flow_residual": 0.004842662152487952,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.125,
+      "raw_value": 0.003797836319790696,
+      "eye_aperture": 0.20968005599802267,
+      "mouth_opening": 0.013604403227871589,
+      "pose_change_radians": 0.020854046568274498,
+      "local_flow_residual": 0.004128385026702449,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.25,
+      "raw_value": 0.0034429887100060055,
+      "eye_aperture": 0.17907571417497362,
+      "mouth_opening": 0.0072230136683111455,
+      "pose_change_radians": 0.008257608860731125,
+      "local_flow_residual": 0.004157238860151014,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.375,
+      "raw_value": 0.0017314641187691395,
+      "eye_aperture": 0.18570913871636047,
+      "mouth_opening": 0.008452151862021522,
+      "pose_change_radians": 0.007948664017021656,
+      "local_flow_residual": 0.003181710369511879,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.5,
+      "raw_value": 0.003040823009434912,
+      "eye_aperture": 0.18058712796988943,
+      "mouth_opening": 0.007502058377027931,
+      "pose_change_radians": 0.006477794144302607,
+      "local_flow_residual": 0.00535729908279631,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.625,
+      "raw_value": 0.002553261403803637,
+      "eye_aperture": 0.1570946809214349,
+      "mouth_opening": 0.007000249329632304,
+      "pose_change_radians": 0.019930340349674225,
+      "local_flow_residual": 0.004177377355721001,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.75,
+      "raw_value": 0.0020704781465790546,
+      "eye_aperture": 0.16192217206698462,
+      "mouth_opening": 0.008127482332895274,
+      "pose_change_radians": 0.004882817156612873,
+      "local_flow_residual": 0.0045756046142439374,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 1.875,
+      "raw_value": 0.002699613131952574,
+      "eye_aperture": 0.16416921563693918,
+      "mouth_opening": 0.00925326264832031,
+      "pose_change_radians": 0.01424421463161707,
+      "local_flow_residual": 0.004367807026772039,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.0,
+      "raw_value": 0.0021573619491898374,
+      "eye_aperture": 0.18218544653788835,
+      "mouth_opening": 0.01080058323482916,
+      "pose_change_radians": 0.01050660852342844,
+      "local_flow_residual": 0.003672168068089559,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.125,
+      "raw_value": 0.0021416591297690442,
+      "eye_aperture": 0.1840619562655341,
+      "mouth_opening": 0.007398454096564374,
+      "pose_change_radians": 0.016224052757024765,
+      "local_flow_residual": 0.003503977870986892,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.25,
+      "raw_value": 0.0020301164994664506,
+      "eye_aperture": 0.19513719488470416,
+      "mouth_opening": 0.010146122480909864,
+      "pose_change_radians": 0.018886100500822067,
+      "local_flow_residual": 0.00369661365069575,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.375,
+      "raw_value": 0.0026473567335278587,
+      "eye_aperture": 0.1760725602880445,
+      "mouth_opening": 0.010365265476649007,
+      "pose_change_radians": 0.015609892085194588,
+      "local_flow_residual": 0.003935863795918017,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.5,
+      "raw_value": 0.004407900339570719,
+      "eye_aperture": 0.2028223100403984,
+      "mouth_opening": 0.01031547220568696,
+      "pose_change_radians": 0.02186976745724678,
+      "local_flow_residual": 0.008965332015645335,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.625,
+      "raw_value": 0.001704341508456798,
+      "eye_aperture": 0.20725593696216643,
+      "mouth_opening": 0.010751007184759277,
+      "pose_change_radians": 0.010731135495007038,
+      "local_flow_residual": 0.001547896200276634,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.75,
+      "raw_value": 0.0015134352223043989,
+      "eye_aperture": 0.16786346613251393,
+      "mouth_opening": 0.007074083655475131,
+      "pose_change_radians": 0.01959250308573246,
+      "local_flow_residual": 0.005076067080636009,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 2.875,
+      "raw_value": 0.0015995828757803276,
+      "eye_aperture": 0.1786946728995047,
+      "mouth_opening": 0.007691319968585408,
+      "pose_change_radians": 0.0140927629545331,
+      "local_flow_residual": 0.0029926573100550594,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.0,
+      "raw_value": 0.0010668100276348483,
+      "eye_aperture": 0.17830903759243974,
+      "mouth_opening": 0.009822250462285787,
+      "pose_change_radians": 0.01354935858398676,
+      "local_flow_residual": 0.002576692381307719,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.125,
+      "raw_value": 0.0010442120273877363,
+      "eye_aperture": 0.1560145999468726,
+      "mouth_opening": 0.007278723968728294,
+      "pose_change_radians": 0.014745904132723808,
+      "local_flow_residual": 0.004142864411112723,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.25,
+      "raw_value": 0.001160082294239118,
+      "eye_aperture": 0.1345807704133529,
+      "mouth_opening": 0.010355729923612774,
+      "pose_change_radians": 0.012723537161946297,
+      "local_flow_residual": 0.0028371213625155737,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.375,
+      "raw_value": 0.001663699724038647,
+      "eye_aperture": 0.17142457865764002,
+      "mouth_opening": 0.0032720768217699763,
+      "pose_change_radians": 0.02807178534567356,
+      "local_flow_residual": 0.0031825838785763897,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.5,
+      "raw_value": 0.0010218828851302774,
+      "eye_aperture": 0.17933490923822631,
+      "mouth_opening": 0.005829476418399693,
+      "pose_change_radians": 0.016529789194464684,
+      "local_flow_residual": 0.002288485064748814,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.625,
+      "raw_value": 0.0031852783076670257,
+      "eye_aperture": 0.1897309868500549,
+      "mouth_opening": 0.005546228015415726,
+      "pose_change_radians": 0.01442716270685196,
+      "local_flow_residual": 0.00406102777571897,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.75,
+      "raw_value": 0.0027525534035694687,
+      "eye_aperture": 0.15588087616058566,
+      "mouth_opening": 0.007656276090889699,
+      "pose_change_radians": 0.018073249608278275,
+      "local_flow_residual": 0.005502617362043936,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 3.875,
+      "raw_value": 0.00206953669625007,
+      "eye_aperture": 0.168689412619015,
+      "mouth_opening": 0.009968077926770838,
+      "pose_change_radians": 0.013654530979692936,
+      "local_flow_residual": 0.00271296827287789,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.0,
+      "raw_value": 0.003284488803021247,
+      "eye_aperture": 0.22543483785610996,
+      "mouth_opening": 0.007576886102197585,
+      "pose_change_radians": 0.027002375572919846,
+      "local_flow_residual": 0.008221556472468918,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.125,
+      "raw_value": 0.0016197966067459226,
+      "eye_aperture": 0.18335601651423447,
+      "mouth_opening": 0.006971850560145749,
+      "pose_change_radians": 0.01114528439939022,
+      "local_flow_residual": 0.003078923893760509,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.25,
+      "raw_value": 0.0013550462521092301,
+      "eye_aperture": 0.21170338769757732,
+      "mouth_opening": 0.008493797993934413,
+      "pose_change_radians": 0.02122238464653492,
+      "local_flow_residual": 0.003515383652024021,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.375,
+      "raw_value": 0.0014993045116270815,
+      "eye_aperture": 0.1737281842811553,
+      "mouth_opening": 0.00711691963133291,
+      "pose_change_radians": 0.01756478287279606,
+      "local_flow_residual": 0.0024374739749351585,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.5,
+      "raw_value": 0.0008353036443534076,
+      "eye_aperture": 0.18535545781105037,
+      "mouth_opening": 0.009548074021834019,
+      "pose_change_radians": 0.022381652146577835,
+      "local_flow_residual": 0.0034659358029884993,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.625,
+      "raw_value": 0.0023134903004591594,
+      "eye_aperture": 0.199611775167821,
+      "mouth_opening": 0.01185973936619054,
+      "pose_change_radians": 0.018302662298083305,
+      "local_flow_residual": 0.0061586820855281275,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.75,
+      "raw_value": 0.003895047017709463,
+      "eye_aperture": 0.14400632517833598,
+      "mouth_opening": 0.009960881882537416,
+      "pose_change_radians": 0.02880959026515484,
+      "local_flow_residual": 0.0057584910905652854,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 4.875,
+      "raw_value": 0.003152135108533944,
+      "eye_aperture": 0.13834112812024102,
+      "mouth_opening": 0.011265664376012651,
+      "pose_change_radians": 0.014842601493000984,
+      "local_flow_residual": 0.005353081256255005,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    },
+    {
+      "timestamp": 5.0,
+      "raw_value": 0.0022696943326034765,
+      "eye_aperture": 0.15333655304388213,
+      "mouth_opening": 0.01009771067894071,
+      "pose_change_radians": 0.015128985047340393,
+      "local_flow_residual": 0.00604393881033902,
+      "confidence": 1.0,
+      "valid_tracks": 13
+    }
+  ]
+}
