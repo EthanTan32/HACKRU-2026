@@ -173,14 +173,12 @@ export default function Analyzer() {
 
   // Where this visit starts: a video handed over from the home page, an analysis named in the
   // URL (after a refresh or from a shared link), or nothing yet
-  const [handoff] = useState(() => {
-    const file = peekPendingFile();
-    return { file, previewUrl: file ? URL.createObjectURL(file) : null };
-  });
+  const [handoff] = useState(() => ({ file: peekPendingFile() }));
 
   const [phase, setPhase] = useState<Phase>(handoff.file ? "uploading" : urlId ? "queued" : "idle");
   const [file, setFile] = useState<File | null>(handoff.file);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(handoff.previewUrl);
+  // Local playback URL for the chosen file, paired with the file it was made from
+  const [preview, setPreview] = useState<{ file: File; url: string } | null>(null);
   const [id, setId] = useState<string | null>(handoff.file ? null : urlId);
   const [progress, setProgress] = useState(0);
   // Share of the analysis done (0 to 1), and the latest progress report it is estimated from
@@ -191,11 +189,17 @@ export default function Analyzer() {
   const [elapsed, setElapsed] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Free the local preview when it's replaced or the page closes
+  // Make the local preview URL here rather than when the file is picked: React re-runs effects
+  // (StrictMode in development, and Next hiding then showing a kept page), and a URL made once
+  // would be revoked by the first cleanup and leave the video pointing at nothing
   useEffect(() => {
-    if (!previewUrl) return;
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    // Syncing with a browser resource (an object URL), which effects are for
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPreview({ file, url });
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   // Sends the video and moves on to waiting for the analysis
   const upload = async (picked: File) => {
@@ -213,7 +217,6 @@ export default function Analyzer() {
 
   const start = (picked: File) => {
     setFile(picked);
-    setPreviewUrl(URL.createObjectURL(picked));
     setResult(null);
     setError(null);
     setProgress(0);
@@ -227,7 +230,6 @@ export default function Analyzer() {
   const reset = () => {
     setPhase("idle");
     setFile(null);
-    setPreviewUrl(null);
     setId(null);
     setResult(null);
     setError(null);
@@ -341,6 +343,9 @@ export default function Analyzer() {
     video.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  // The local file plays without a download; otherwise (after a refresh or from a shared link)
+  // stream the uploaded copy from the backend
+  const previewUrl = preview && preview.file === file ? preview.url : null;
   const videoSrc = previewUrl ?? (id ? mediaUrl(id) : null);
 
   if (phase === "idle") {
