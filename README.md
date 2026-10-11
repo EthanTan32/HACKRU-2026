@@ -1,13 +1,6 @@
 # HACKRU-2026
 
-# HACKRU-2026
-<<<<<<< Updated upstream
-yo
-=======
-
 FrameTrace video forensics is available in [FrameTrace](FrameTrace/README.md), including backend/frontend setup, optional model downloads, tests, and classifier training instructions.
-yo
-
 
 ## Inspiration
 
@@ -62,7 +55,6 @@ Working with training data taught us the complexity of diffusion models and how 
 Browser Extension for Live Verification: Bringing VerityAI’s C2PA and scan heuristics directly to users browsing through social media feeds for real-time alerts of altered or generated content.
 
 Continuous Audio-Visual Sync: Detecting deepfakes by identifying desyncs between the video and audio through precise facial landmark systems and audio processing.
->>>>>>> Stashed changes
 
 
 FrameTrace video forensics is available in [FrameTrace](FrameTrace/README.md), including backend/frontend setup, optional model downloads, tests, and classifier training instructions.
