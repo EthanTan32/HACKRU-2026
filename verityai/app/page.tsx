@@ -74,9 +74,9 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* Depth map: hover the video to see its depth underneath */}
+      {/* Depth map: hover the video to see its depth underneath, with an explainer beside it */}
       <section id="depth" className="flex justify-center px-4 py-24">
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-7xl">
           <DepthReveal />
         </div>
       </section>

@@ -10,6 +10,7 @@
   --animate-drift-3: drift-3 26s ease-in-out infinite;
   --animate-scan: scan 7s linear infinite;
   --animate-carousel: carousel-progress 9s linear forwards;
+  --animate-fade-in: fade-in 0.4s ease-out;
 
   @keyframes pulse-slow {
     0%, 100% { opacity: 1; }
@@ -30,6 +31,11 @@
   @keyframes scan {
     from { top: -8rem; }
     to { top: 100%; }
+  }
+  /* Swapping text in the depth viewer's side panel */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(0.25rem); }
+    to { opacity: 1; transform: translateY(0); }
   }
   /* Autoplay timer bar under the active carousel tab */
   @keyframes carousel-progress {
