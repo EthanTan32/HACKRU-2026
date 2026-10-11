@@ -30,6 +30,8 @@ function waveHeight(x: number, z: number, t: number) {
 const RIPPLES = 16;
 const RIPPLE_LIFE = 4.5;
 const RIPPLE_SPEED = 3.9;
+// How high the cursor raises the waves (shared by the shader and the cursor point above it)
+const MOUND_HEIGHT = 0.56;
 
 const waveVertex = /* glsl */ `
   uniform float uTime;
@@ -59,10 +61,10 @@ const waveVertex = /* glsl */ `
     // Cursor: raise a glowing mound and push points slightly outward
     vec2 dir = p.xz - uMouse;
     float dm = length(dir);
-    float infl = exp(-dm * dm * 0.038) * uStrength;
-    h += infl * 0.48;
+    float infl = exp(-dm * dm * 0.032) * uStrength;
+    h += infl * ${MOUND_HEIGHT.toFixed(2)};
     // Smooth push (zero at the center) so points never flip sides as the cursor passes
-    p.xz += dir * exp(-dm * dm * 0.08) * uStrength * 0.14;
+    p.xz += dir * exp(-dm * dm * 0.08) * uStrength * 0.16;
     vGlow = infl;
 
     // Ripples left by cursor movement
@@ -103,6 +105,7 @@ const waveVertex = /* glsl */ `
 const waveFragment = /* glsl */ `
   uniform vec3 uColor;
   uniform vec3 uDeep;
+  uniform float uFade;
   varying float vHeight;
   varying float vDepth;
   varying float vGlow;
@@ -124,16 +127,37 @@ const waveFragment = /* glsl */ `
 
     // Fade with distance so the field dissolves into the page
     float fog = smoothstep(70.0, 12.0, vDepth);
-    float alpha = (0.38 + k * 0.34 + vGlow * 0.12 + vRing * 0.16 + vScan * 0.2) * 1.15;
-    gl_FragColor = vec4(color, soft * fog * alpha * vTwinkle);
+    float alpha = (0.5 + k * 0.22 + vGlow * 0.12 + vRing * 0.16 + vScan * 0.2) * 1.15;
+    gl_FragColor = vec4(color, soft * fog * alpha * vTwinkle * uFade);
   }
 `;
+
+// Dust specks rise through this height band and wrap from the top back to the bottom.
+// It is tall enough to fill the whole screen once the waves have scrolled away.
+const DUST_BOTTOM = -20;
+const DUST_HEIGHT = 40;
+// Lowest speck height while the waves are on screen, so specks don't show through the sea
+const DUST_FLOOR_OVER_WAVES = -4;
+// How bright and how large the specks are behind the rest of the page, relative to over the
+// waves. Brighter than in the hero, since nothing else is drawn there.
+const DUST_LEVEL_BELOW_HERO = 2.6;
+const DUST_SIZE_BELOW_HERO = 1.3;
+// How sharply each speck's glow falls off from its center (lower lights up more of the speck)
+const DUST_FALLOFF_OVER_WAVES = 2.0;
+const DUST_FALLOFF_BELOW_HERO = 1.2;
+// Specks sit between these distances from the camera
+const DUST_NEAR = 14;
+const DUST_FAR = 42;
+// How far scrolling carries the specks, as a fraction of how far the page content moves
+const SCROLL_PUSH = 0.25;
 
 const dustVertex = /* glsl */ `
   uniform float uTime;
   uniform float uPixelRatio;
   uniform vec3 uCursor;
   uniform float uStrength;
+  uniform float uFloor;
+  uniform float uSize;
   attribute float aSeed;
   varying float vAlpha;
 
@@ -142,20 +166,25 @@ const dustVertex = /* glsl */ `
     gl_Position = projectionMatrix * mv;
     // Specks near the cursor brighten slightly
     float near = exp(-pow(distance(position, uCursor), 2.0) * 0.03) * uStrength;
-    gl_PointSize = (3.0 + aSeed * 4.0 + near * 0.65) * uPixelRatio * (20.0 / -mv.z);
+    gl_PointSize = (3.0 + aSeed * 4.0 + near * 0.65) * uPixelRatio * uSize * (20.0 / -mv.z);
     vAlpha = 0.15 + 0.3 * abs(sin(uTime * (0.5 + aSeed) + aSeed * 10.0)) + near * 0.1;
+    // Fade in above the floor and out near the top, so wrapping specks never pop
+    float top = ${(DUST_BOTTOM + DUST_HEIGHT).toFixed(1)};
+    vAlpha *= smoothstep(uFloor, uFloor + 3.0, position.y) * smoothstep(top, top - 3.0, position.y);
   }
 `;
 
 const dustFragment = /* glsl */ `
   uniform vec3 uColor;
+  uniform float uLevel;
+  uniform float uFalloff;
   varying float vAlpha;
 
   void main() {
     float r = length(gl_PointCoord - 0.5);
     if (r > 0.5) discard;
-    float glow = pow(smoothstep(0.5, 0.0, r), 2.0);
-    gl_FragColor = vec4(uColor, glow * vAlpha);
+    float glow = pow(smoothstep(0.5, 0.0, r), uFalloff);
+    gl_FragColor = vec4(uColor, glow * vAlpha * uLevel);
   }
 `;
 
@@ -198,13 +227,18 @@ export default function Background() {
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
-    const scene = new THREE.Scene();
+    // Two passes: the waves scroll away with the hero, while the dust stays on screen
+    // behind the whole page, so each gets its own scene and camera
+    renderer.autoClear = false;
+    const waveScene = new THREE.Scene();
+    const dustScene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
     camera.position.set(0, 7, 24);
     camera.lookAt(0, 0, -10);
+    const dustCamera = camera.clone();
 
     const green = themeColor("--color-success", "oklch(76% 0.177 163.223)");
-    const deep = new THREE.Vector3(0.05, 0.38, 0.32);
+    const deep = new THREE.Vector3(0.08, 0.48, 0.4);
 
     // Wave field: a grid of points on the XZ plane
     const cols = 130;
@@ -233,21 +267,27 @@ export default function Background() {
         uMouse: { value: new THREE.Vector2(0, 0) },
         uStrength: { value: 0 },
         uRipples: { value: ripples },
+        uFade: { value: 1 },
       },
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
     });
-    scene.add(new THREE.Points(waveGeometry, waveMaterial));
+    waveScene.add(new THREE.Points(waveGeometry, waveMaterial));
 
     // Floating dust motes, animated on the CPU so lines can connect to them
-    const dustCount = 160;
+    const dustCount = 260;
     const dustBase = new Float32Array(dustCount * 3);
     const dustSeeds = new Float32Array(dustCount);
+    // Spread each speck across the full width the camera sees at its depth (with room for wide
+    // screens), so they fill the screen evenly instead of bunching up in the middle far away
+    const halfFov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     for (let i = 0; i < dustCount; i++) {
-      dustBase[i * 3] = (Math.random() - 0.5) * 70;
-      dustBase[i * 3 + 1] = Math.random() * 20;
-      dustBase[i * 3 + 2] = (Math.random() - 0.5) * 50 - 8;
+      const distance = DUST_NEAR + Math.random() * (DUST_FAR - DUST_NEAR);
+      const halfWidth = distance * halfFov * 2.1;
+      dustBase[i * 3] = (Math.random() * 2 - 1) * halfWidth;
+      dustBase[i * 3 + 1] = Math.random() * DUST_HEIGHT;
+      dustBase[i * 3 + 2] = camera.position.z - distance;
       dustSeeds[i] = Math.random();
     }
     const dustPositions = new Float32Array(dustCount * 3);
@@ -265,6 +305,10 @@ export default function Background() {
         uColor: { value: green },
         uCursor: { value: new THREE.Vector3(0, -100, 0) },
         uStrength: { value: 0 },
+        uFloor: { value: DUST_FLOOR_OVER_WAVES },
+        uSize: { value: 1 },
+        uLevel: { value: 1 },
+        uFalloff: { value: DUST_FALLOFF_OVER_WAVES },
       },
       transparent: true,
       depthWrite: false,
@@ -272,7 +316,7 @@ export default function Background() {
     });
     const dust = new THREE.Points(dustGeometry, dustMaterial);
     dust.frustumCulled = false;
-    scene.add(dust);
+    dustScene.add(dust);
 
     // Faint "neural" lines between dust motes near the cursor
     const maxSegments = 160;
@@ -295,10 +339,15 @@ export default function Background() {
     });
     const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
     lines.frustumCulled = false;
-    scene.add(lines);
+    dustScene.add(lines);
 
-    // Point hovering over the waves under the cursor (invisible; dust reacts to it)
+    // Point the dust reacts to (invisible): hovering over the waves under the cursor while they
+    // are on screen, and on a plane facing the screen once they've scrolled away
     const cursor = new THREE.Vector3(0, -100, 0);
+    const waveCursor = new THREE.Vector3();
+    const screenCursor = new THREE.Vector3();
+    const screenRay = new THREE.Raycaster();
+    const SCREEN_CURSOR_DEPTH = 26;
 
     // Pointer tracking: screen position, projected onto the wave plane
     const pointer = new THREE.Vector2(0, 0);
@@ -329,28 +378,35 @@ export default function Background() {
     const onPointerLeave = () => {
       lastMove = -10;
     };
-    // Offset the camera's view by the page scroll so the scene moves up with the content,
-    // and fade it out over the first screen of scrolling
-    let opacity = -1;
+    // Offset the wave camera's view by the page scroll so the waves move up with the content,
+    // and fade them out over the first screen of scrolling. The dust dims a little as they go.
+    let fade = 1;
     const followScroll = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       camera.setViewOffset(w, h, 0, window.scrollY, w, h);
-      const fade = Math.round(Math.min(Math.max(1 - window.scrollY / (h * 0.8), 0), 1) * 100) / 100;
-      if (fade !== opacity) {
-        opacity = fade;
-        renderer.domElement.style.opacity = String(fade);
-      }
-      return fade > 0;
+      fade = Math.min(Math.max(1 - window.scrollY / (h * 0.8), 0), 1);
+      waveMaterial.uniforms.uFade.value = fade;
+      dustMaterial.uniforms.uLevel.value = THREE.MathUtils.lerp(DUST_LEVEL_BELOW_HERO, 1, fade);
+      dustMaterial.uniforms.uSize.value = THREE.MathUtils.lerp(DUST_SIZE_BELOW_HERO, 1, fade);
+      dustMaterial.uniforms.uFalloff.value = THREE.MathUtils.lerp(DUST_FALLOFF_BELOW_HERO, DUST_FALLOFF_OVER_WAVES, fade);
+      dustMaterial.uniforms.uFloor.value = THREE.MathUtils.lerp(DUST_BOTTOM, DUST_FLOOR_OVER_WAVES, fade);
+    };
+    const draw = () => {
+      renderer.clear();
+      if (fade > 0) renderer.render(waveScene, camera);
+      renderer.render(dustScene, dustCamera);
     };
     const onScroll = () => {
       followScroll();
-      renderer.render(scene, camera);
+      draw();
     };
 
     const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+      for (const cam of [camera, dustCamera]) {
+        cam.aspect = window.innerWidth / window.innerHeight;
+        cam.updateProjectionMatrix();
+      }
       renderer.setSize(window.innerWidth, window.innerHeight);
       if (reduceMotion) onScroll();
     };
@@ -362,11 +418,15 @@ export default function Background() {
       document.documentElement.addEventListener("pointerleave", onPointerLeave);
     }
 
+    // Extra height scrolling has carried the specks, on top of their own slow rise
+    let scrollLift = 0;
+
     const updateDust = (t: number) => {
       for (let i = 0; i < dustCount; i++) {
         const s = dustSeeds[i];
+        const y = dustBase[i * 3 + 1] + t * (0.3 + s * 0.5) + scrollLift;
         dustPositions[i * 3] = dustBase[i * 3] + Math.sin(t * 0.3 + s * 6.28) * 0.8;
-        dustPositions[i * 3 + 1] = ((dustBase[i * 3 + 1] + t * (0.3 + s * 0.5)) % 20) - 4;
+        dustPositions[i * 3 + 1] = (((y % DUST_HEIGHT) + DUST_HEIGHT) % DUST_HEIGHT) + DUST_BOTTOM;
         dustPositions[i * 3 + 2] = dustBase[i * 3 + 2];
       }
       dustAttr.needsUpdate = true;
@@ -411,7 +471,7 @@ export default function Background() {
               push(
                 dustPositions[i], dustPositions[i + 1], dustPositions[i + 2],
                 dustPositions[j], dustPositions[j + 1], dustPositions[j + 2],
-                (1 - d / 5) * 0.065 * strength,
+                (1 - d / 5) * 0.065 * strength * dustMaterial.uniforms.uLevel.value,
               );
             }
           }
@@ -425,45 +485,66 @@ export default function Background() {
     // Frame-rate independent easing: fraction to move this frame for a given rate per second
     const ease = (rate: number, dt: number) => 1 - Math.exp(-rate * dt);
 
+    // Scroll speed, smoothed so a scroll gives the specks a push that coasts to a stop
+    let lastScrollY = window.scrollY;
+    let scrollVelocity = 0;
+
     let frame = 0;
     let lastT = now();
     const animate = () => {
       frame = requestAnimationFrame(animate);
-      if (!followScroll()) return;
+      followScroll();
       const t = now();
       const dt = Math.min(t - lastT, 0.1);
       lastT = t;
 
+      // Scrolling down moves the content up, so carry the specks up with it a little.
+      // World units per screen pixel at roughly the depth where most of the dust sits.
+      const scrollY = window.scrollY;
+      if (dt > 0) {
+        const measured = THREE.MathUtils.clamp((scrollY - lastScrollY) / dt, -4000, 4000);
+        scrollVelocity += (measured - scrollVelocity) * ease(3, dt);
+      }
+      lastScrollY = scrollY;
+      const unitsPerPixel = (2 * 30 * Math.tan(THREE.MathUtils.degToRad(30))) / window.innerHeight;
+      scrollLift += scrollVelocity * unitsPerPixel * SCROLL_PUSH * dt;
+
       // Where the cursor lands on the wave surface: start from the flat plane,
       // then refine against the actual wave height so the mound sits under the cursor
-      raycaster.setFromCamera(pointer, camera);
-      plane.constant = 0;
-      for (let i = 0; i < 3; i++) {
-        if (!raycaster.ray.intersectPlane(plane, hit)) break;
-        plane.constant = -(waveHeight(hit.x, hit.z, t) + 0.48 * strength);
+      if (fade > 0) {
+        raycaster.setFromCamera(pointer, camera);
+        plane.constant = 0;
+        for (let i = 0; i < 3; i++) {
+          if (!raycaster.ray.intersectPlane(plane, hit)) break;
+          plane.constant = -(waveHeight(hit.x, hit.z, t) + MOUND_HEIGHT * strength);
+        }
+        if (raycaster.ray.intersectPlane(plane, hit)) {
+          mouseTarget.set(hit.x, THREE.MathUtils.clamp(hit.z, -40, 30));
+        }
       }
-      if (raycaster.ray.intersectPlane(plane, hit)) {
-        mouseTarget.set(hit.x, THREE.MathUtils.clamp(hit.z, -40, 30));
-      }
-      mouseWorld.lerp(mouseTarget, ease(2.8, dt));
+      mouseWorld.lerp(mouseTarget, ease(3.4, dt));
 
       // Fade the interaction in while the cursor is active, out when idle
       const active = t - lastMove < 2.5 ? 1 : 0;
-      strength += (active - strength) * ease(1.7, dt);
+      strength += (active - strength) * ease(2.2, dt);
 
       // Leave a trail of small ripples while moving
       if (
         active &&
         t - lastRipple > 0.3 &&
-        mouseWorld.distanceTo(lastRipplePos) > 1.5
+        mouseWorld.distanceTo(lastRipplePos) > 1.2
       ) {
-        addRipple(mouseWorld.x, mouseWorld.y, 0.12);
+        addRipple(mouseWorld.x, mouseWorld.y, 0.14);
         lastRipple = t;
         lastRipplePos.copy(mouseWorld);
       }
 
-      const surface = waveHeight(mouseWorld.x, mouseWorld.y, t) + 0.48 * strength;
-      cursor.set(mouseWorld.x, surface + 1.4, mouseWorld.y);
+      const surface = waveHeight(mouseWorld.x, mouseWorld.y, t) + MOUND_HEIGHT * strength;
+      waveCursor.set(mouseWorld.x, surface + 1.4, mouseWorld.y);
+      // Below the hero, a point straight "behind" the cursor at a fixed depth into the dust
+      screenRay.setFromCamera(pointer, dustCamera);
+      screenRay.ray.at(SCREEN_CURSOR_DEPTH, screenCursor);
+      cursor.lerpVectors(screenCursor, waveCursor, fade);
 
       waveMaterial.uniforms.uTime.value = t;
       waveMaterial.uniforms.uMouse.value.copy(mouseWorld);
@@ -475,7 +556,7 @@ export default function Background() {
       updateDust(t);
       updateLines();
 
-      renderer.render(scene, camera);
+      draw();
     };
 
     if (reduceMotion) {
