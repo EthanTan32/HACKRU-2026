@@ -8,6 +8,8 @@
   --animate-pulse-slow: pulse-slow 6s ease-in-out infinite;
   --animate-drift-2: drift-2 22s ease-in-out infinite;
   --animate-drift-3: drift-3 26s ease-in-out infinite;
+  --animate-scan: scan 7s linear infinite;
+  --animate-carousel: carousel-progress 9s linear forwards;
 
   @keyframes pulse-slow {
     0%, 100% { opacity: 1; }
@@ -23,5 +25,15 @@
     0%, 100% { transform: translate(0, 0); }
     30% { transform: translate(-10rem, -6rem); }
     60% { transform: translate(-4rem, -12rem); }
+  }
+  /* A soft beam that sweeps down a panel, like the scan line in the hero waves */
+  @keyframes scan {
+    from { top: -8rem; }
+    to { top: 100%; }
+  }
+  /* Autoplay timer bar under the active carousel tab */
+  @keyframes carousel-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
   }
 }

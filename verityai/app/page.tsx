@@ -1,3 +1,7 @@
+import DepthReveal from "@/components/depth-reveal";
+import GlitchText from "@/components/glitch-text";
+import Reveal from "@/components/reveal";
+import RiskCarousel from "@/components/risk-carousel";
 import UploadDemo from "@/components/upload-demo";
 
 export default function Home() {
@@ -18,8 +22,8 @@ export default function Home() {
 
         {/* Scroll cue: bouncing arrow between two thin lines */}
         <a
-          href="#demo"
-          aria-label="Scroll down to the demo"
+          href="#why"
+          aria-label="Scroll down to learn why this matters"
           className="absolute bottom-10 left-1/2 flex -translate-x-1/2 items-center gap-5 opacity-70 transition-opacity hover:opacity-100"
         >
           <span className="h-0.5 w-24 bg-white/50" />
@@ -36,6 +40,44 @@ export default function Home() {
           </svg>
           <span className="h-0.5 w-24 bg-white/50" />
         </a>
+      </section>
+
+      <section id="why" className="relative isolate flex flex-col items-center gap-10 px-4 py-20">
+        {/* Faint glow so the section doesn't feel empty once the wave background fades out */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute left-1/2 top-1/3 size-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-radial from-success/10 to-transparent to-70%" />
+        </div>
+
+        <Reveal className="max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-success">Why it matters</p>
+          <h2 className="mt-3 text-5xl font-bold leading-tight">
+            Seeing is no longer <GlitchText>believing</GlitchText>.
+          </h2>
+          <p className="mt-4 text-lg opacity-70">
+            AI can now generate video that looks real to almost anyone, in minutes, from little more than a
+            text prompt or a handful of photos. The tools are cheap, easy to find and keep getting better, and
+            the tells that used to give fakes away, like warped hands, flickering edges and odd blinking, are
+            disappearing. Once a convincing clip is that easy to make, a video on its own stops being proof.
+          </p>
+        </Reveal>
+
+        <Reveal delay={100} className="w-full max-w-4xl">
+          <RiskCarousel />
+        </Reveal>
+
+        <Reveal delay={150}>
+          <p className="text-center text-lg">
+            Telling real from generated keeps video worth trusting.{" "}
+            <span className="text-success">That&apos;s what VerityAI is for.</span>
+          </p>
+        </Reveal>
+      </section>
+
+      {/* Depth map: hover the video to see its depth underneath */}
+      <section id="depth" className="flex justify-center px-4 py-24">
+        <div className="w-full max-w-4xl">
+          <DepthReveal />
+        </div>
       </section>
 
       <section
