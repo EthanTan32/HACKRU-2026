@@ -98,78 +98,16 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="text-center">
+        <div className="flex flex-col items-center text-center">
+          <Image src="/logo.svg" alt="VerityAI logo" width={96} height={96} className="mb-8 size-24" />
           <h2 className="text-5xl font-bold">Try it yourself</h2>
-          <p className="text-lg mt-4 opacity-70">
-            Upload a video and VerityAI will check it for signs of AI generation.
+          <p className="text-lg mt-4 max-w-2xl opacity-70">
+            VerityAI checks depth, motion, color, faces and text frame by frame, then weighs the evidence to judge whether the clip was generated.
           </p>
         </div>
         <UploadDemo />
-      </section>
-
-      <section id="about" className="flex flex-col items-center gap-16 px-4 py-32">
-        <div className="flex max-w-3xl flex-col items-center text-center">
-          <Image src="/logo.svg" alt="VerityAI logo" width={96} height={96} className="mb-8 size-24" />
-          <h2 className="text-5xl font-bold">
-            About{" "}
-            <span className="text-success font-semibold font-(family-name:--font-aleo)">VerityAI</span>
-          </h2>
-          <p className="text-lg mt-6 opacity-70">
-            AI-generated video gets harder to differentiate day by day. VerityAI looks past what
-            your eyes see and observes how the depth map of a video changes each frame to discover the small inconsistencies left behind by generation
-            models.
-          </p>
-        </div>
-
-        <div className="grid w-full max-w-5xl gap-6 md:grid-cols-3">
-          {steps.map((step, i) => (
-            <div key={step.title} className="card bg-base-100/80 border border-base-content/10">
-              <div className="card-body gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-success/15 text-success font-bold">
-                    {i + 1}
-                  </span>
-                  <h3 className="card-title">{step.title}</h3>
-                </div>
-                <p className="opacity-70">{step.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-3">
-          {signals.map((signal) => (
-            <span key={signal} className="badge badge-outline badge-success badge-lg">
-              {signal}
-            </span>
-          ))}
-        </div>
-
-        <p className="text-sm opacity-50">Built at HackRU 2026.</p>
       </section>
     </>
   );
 }
 
-const steps = [
-  {
-    title: "Upload",
-    body: "Drop in any suspicious video clip.",
-  },
-  {
-    title: "Analyze",
-    body: "Our model scans the video frame by frame, finding anomalous features, movement, and lighting in the video.",
-  },
-  {
-    title: "Receive verdict",
-    body: "See how likely the video is to be AI-generated, along with the exact moments that raised a flag.",
-  },
-];
-
-const signals = [
-  "Unnatural motion",
-  "Lighting mismatches",
-  "Flickering details",
-  "Distorted text",
-  "Inconsistent faces"
-];

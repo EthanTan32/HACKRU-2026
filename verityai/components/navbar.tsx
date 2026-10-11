@@ -42,8 +42,8 @@ export default function Navbar() {
       <ul
         tabIndex={-1}
         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        <li><Link href="/demo">Demo</Link></li>
-        <li><Link href="/#about" onClick={scrollToSection("about")}>About</Link></li>
+        <li><Link href="/#depth" onClick={scrollToSection("depth")}>About</Link></li>
+        <li><Link href="/#demo" onClick={scrollToSection("demo")}>Demo</Link></li>
       </ul>
     </div>
     <Link href="/" onClick={scrollToTop} className="flex items-center px-4 text-4xl font-semibold ml-50 text-success font-(family-name:--font-aleo) rounded-field focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success">
@@ -51,8 +51,8 @@ export default function Navbar() {
       VerityAI
     </Link>
     <ul className="menu menu-horizontal menu-lg px-1 ml-4 hidden lg:flex">
-      <li><Link href="/demo">Demo</Link></li>
-      <li><Link href="/#about" onClick={scrollToSection("about")}>About</Link></li>
+      <li><Link href="/#depth" onClick={scrollToSection("depth")}>About</Link></li>
+      <li><Link href="/#demo" onClick={scrollToSection("demo")}>Demo</Link></li>
     </ul>
   </div>
   <div className="navbar-end">
