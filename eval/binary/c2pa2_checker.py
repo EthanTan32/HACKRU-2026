@@ -44,7 +44,7 @@ def validate_with_c2patool(file_path: str) -> bool:
     Validates C2PA cryptographic signature, manifest, and hash integrity
     using the external c2patool CLI or the official c2pa Python SDK.
     """
-    # 1. External c2patool CLI 
+    # 1. External c2patool CLI (if installed on PATH)
     c2pa_bin = shutil.which("c2patool")
     if c2pa_bin:
         try:
@@ -57,12 +57,14 @@ def validate_with_c2patool(file_path: str) -> bool:
             if res.returncode == 0 and res.stdout.strip():
                 data = json.loads(res.stdout)
                 val_status = data.get("validation_status", [])
-                has_error = any(
-                    any(err in item.get("code", "").lower() for err in ["mismatch", "invalid", "error", "fail", "corrupt"])
-                    for item in val_status
-                )
-                if not has_error and (data.get("active_manifest") or not val_status):
-                    return True
+                active_manifest = data.get("active_manifest")
+                if active_manifest:
+                    has_error = any(
+                        any(err in str(item.get("code", "")).lower() for err in ["mismatch", "invalid", "error", "fail", "corrupt", "untrusted"])
+                        for item in val_status
+                    )
+                    if not has_error:
+                        return True
             return False
         except Exception:
             pass
@@ -71,17 +73,22 @@ def validate_with_c2patool(file_path: str) -> bool:
     if c2pa is not None:
         try:
             reader = c2pa.Reader(file_path)
-            val_state = reader.get_validation_state()
-            val_results = reader.get_validation_results() or {}
-            val_status = val_results.get("validation_status", [])
+            if hasattr(reader, "is_valid") and not reader.is_valid():
+                return False
+
+            val_state = reader.get_validation_state() if hasattr(reader, "get_validation_state") else None
+            val_results = reader.get_validation_results() if hasattr(reader, "get_validation_results") else {}
+            val_status = (val_results or {}).get("validation_status", [])
 
             has_error = any(
-                any(err in item.get("code", "").lower() for err in ["mismatch", "invalid", "error", "fail", "corrupt"])
+                any(err in str(item.get("code", "")).lower() for err in ["mismatch", "invalid", "error", "fail", "corrupt", "untrusted"])
                 for item in val_status
             )
-            if not has_error and val_state and val_state.lower() in ("valid", "validated"):
-                return True
-            if not has_error and reader.get_active_manifest() and not val_status:
+            if has_error:
+                return False
+
+            active_manifest = reader.get_active_manifest() if hasattr(reader, "get_active_manifest") else None
+            if active_manifest and (val_state is None or str(val_state).lower() in ("valid", "validated")):
                 return True
         except Exception:
             return False

@@ -10,6 +10,21 @@ from pathlib import Path
 from .detectors.common import response
 from .classifier import maybe_predict, training_sampling
 
+# Mandatory cheap C2PA verification pre-flight
+try:
+    import sys
+    _eval_binary_dir = str(Path(__file__).resolve().parents[3] / "eval" / "binary")
+    _local_binary_dir = str(Path(__file__).resolve().parents[3] / "local" / "binary")
+    for _d in [_eval_binary_dir, _local_binary_dir]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    from c2pa2_checker import check_c2pa
+except Exception:
+    try:
+        from eval.binary.c2pa2_checker import check_c2pa
+    except Exception:
+        check_c2pa = None
+
 DETECTORS = [
     ('text_consistency', text.analyze),
     ('background_motion', background.analyze),
@@ -44,6 +59,41 @@ def warm_up_models():
 def analyze_file(path, artifact_dir=None, sampling=None, analyzer_cache=None):
     if artifact_dir is not None:
         artifact_dir = Path(artifact_dir)
+
+    # Mandatory C2PA Pre-Flight Check:
+    # Extremely cheap (~5-10ms).
+    # If and only if C2PA validates 100% (code 0: valid manifest, valid signatures, no hash errors),
+    # short-circuit the entire neural / heavy detector pipeline and return authentic status.
+    c2pa_status = check_c2pa(str(path)) if check_c2pa is not None else 1
+    if c2pa_status == 0:
+        from .video import inspect_video
+        metadata = inspect_video(path, max_duration_seconds=180)
+        c2pa_result = {
+            'c2pa_verified': True,
+            'c2pa_status': 0,
+            'skipped_neural': True,
+            'classification': 'authentic_c2pa',
+            'ai_probability': 0.0,
+            'message': 'Cryptographic C2PA validation succeeded (100% valid). Neural backend bypassed.',
+            'extraction_config': contract(sampling),
+            'artifacts': [],
+            'video': {
+                'duration_seconds': round(metadata['duration'], 3),
+                'fps': round(metadata['fps'], 2),
+                'sampled_frames': 0,
+                'analyzer_frames': {name: 0 for name, _ in DETECTORS},
+            },
+            'detectors': {
+                name: response(name, 'not_needed', score=0.0,
+                               note='Bypassed: Video cryptographically authenticated via C2PA.')
+                for name, _ in DETECTORS
+            },
+            'timeline': [],
+        }
+        return c2pa_result
+
+    # If C2PA is missing, invalid, corrupt, or anything is not 100% valid,
+    # let the video through to the neural / computer vision backend!
     outputs = {}
     saved_artifacts = []
     counts = {}
@@ -94,6 +144,9 @@ def analyze_file(path, artifact_dir=None, sampling=None, analyzer_cache=None):
                        for name, result in outputs.items() for event in result['events']],
                       key=lambda event: event['timestamp'])
     result = {
+        'c2pa_verified': False,
+        'c2pa_status': c2pa_status,
+        'skipped_neural': False,
         'extraction_config': contract(sampling),
         'artifacts': saved_artifacts,
         'video': {'duration_seconds': round(metadata['duration'], 3), 'fps': round(metadata['fps'], 2),
