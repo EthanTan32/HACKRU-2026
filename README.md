@@ -34,7 +34,7 @@ VerityAI is structured into 3 parts: a web platform, a diagnostic console, and a
 
 Metadata stripping: social media platforms strip C2PA metadata during compression which demands even more accuracy out of VerityAI
 
-Motion confusion: 
+Motion confusion: real content featuring rapid camera pans, handheld jitter, or fast-moving subjects can easily trigger false positives that mimic generative artifacts; we resolved this by applying forward-backward optical flow consistency and edge gradient masking to distinguish natural motion from generative artifacts.
 
 ## Accomplishments that we're proud of
 
