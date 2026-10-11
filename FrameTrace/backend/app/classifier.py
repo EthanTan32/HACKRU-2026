@@ -17,6 +17,19 @@ def load_model(path):
     return joblib.load(path)
 
 
+def training_sampling():
+    """Per-analyzer sampling profiles the configured classifier was trained with, so uploads
+    are analyzed identically; None (defaults) when no usable model is configured."""
+    path = os.getenv('CLASSIFIER_PATH', '')
+    if not path or not Path(path).is_file():
+        return None
+    try:
+        trained = (load_model(path).get('extraction_config') or {}).get('profiles') or {}
+    except Exception:
+        return None
+    return {name: dict(profile) for name, profile in trained.items()} or None
+
+
 def maybe_predict(result):
     path = os.getenv('CLASSIFIER_PATH', '')
     if not path:

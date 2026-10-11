@@ -17,31 +17,47 @@ def levenshtein(a: str, b: str) -> int:
 
 @lru_cache(maxsize=1)
 def get_ocr():
+    # With paddlepaddle-gpu on Windows, PyTorch's CUDA DLLs must load before Paddle's;
+    # the reverse order makes `import torch` fail (WinError 127) for the depth model.
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        pass
     from paddleocr import PaddleOCR
     return PaddleOCR(use_doc_orientation_classify=False, use_doc_unwarping=False,
                      use_textline_orientation=False)
 
 
 def recognize(frame):
-    results = get_ocr().predict(frame)
+    return recognize_many([frame])[0]
+
+
+def recognize_many(frames):
+    """OCR several frames in one call; PaddleOCR returns one result per input, in order."""
+    results = list(get_ocr().predict(list(frames)))
+    if len(results) != len(frames):
+        raise RuntimeError(f'OCR returned {len(results)} results for {len(frames)} frames')
+    return [_detections(result) for result in results]
+
+
+def _detections(result):
     out = []
-    for result in results:
-        # PaddleOCR 3.x result objects support item lookup; JSON result wraps under `res`.
-        data = result.json if hasattr(result, 'json') else result
-        if callable(data):
-            data = data()
-        if 'res' in data:
-            data = data['res']
-        for txt, confidence, box in zip(data.get('rec_texts', []),
-                                         data.get('rec_scores', []),
-                                         data.get('rec_boxes', [])):
-            normalized = ''.join(c for c in txt.upper() if c.isalnum())
-            if len(normalized) < 3 or float(confidence) < .85:
-                continue
-            x1, y1, x2, y2 = map(float, box)
-            out.append({'text': normalized, 'score': float(confidence),
-                        'center': ((x1+x2)/2, (y1+y2)/2),
-                        'size': max(1, (x2-x1)*(y2-y1))})
+    # PaddleOCR 3.x result objects support item lookup; JSON result wraps under `res`.
+    data = result.json if hasattr(result, 'json') else result
+    if callable(data):
+        data = data()
+    if 'res' in data:
+        data = data['res']
+    for txt, confidence, box in zip(data.get('rec_texts', []),
+                                     data.get('rec_scores', []),
+                                     data.get('rec_boxes', [])):
+        normalized = ''.join(c for c in txt.upper() if c.isalnum())
+        if len(normalized) < 3 or float(confidence) < .85:
+            continue
+        x1, y1, x2, y2 = map(float, box)
+        out.append({'text': normalized, 'score': float(confidence),
+                    'center': ((x1+x2)/2, (y1+y2)/2),
+                    'size': max(1, (x2-x1)*(y2-y1))})
     return out
 
 
@@ -55,12 +71,13 @@ def analyze(frames):
         return response('text_consistency', 'not_available', note=f'OCR model failed to initialize: {exc}')
     tracks, next_id = [], 0
     h, w = frames[0].bgr.shape[:2]
-    for idx in range(0, len(frames), 2):
+    indices = list(range(0, len(frames), 2))
+    try:
+        all_detections = recognize_many([frames[idx].bgr for idx in indices])
+    except Exception as exc:
+        return response('text_consistency', 'error', note=f'OCR inference error: {exc}')
+    for idx, detections in zip(indices, all_detections):
         f = frames[idx]
-        try:
-            detections = recognize(f.bgr)
-        except Exception as exc:
-            return response('text_consistency', 'error', note=f'OCR inference error: {exc}')
         taken = set()
         for det in detections:
             choice, best = None, float('inf')

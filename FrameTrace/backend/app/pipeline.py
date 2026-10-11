@@ -1,5 +1,5 @@
 import traceback
-from .video import sample_frames
+from .video import Frame, sample_frames
 from .visualizations import save_visuals
 from .config import STORAGE_DIR
 from .store import update_job, get_job
@@ -8,7 +8,7 @@ from .preprocessing import profiles, contract
 import cv2
 from pathlib import Path
 from .detectors.common import response
-from .classifier import maybe_predict
+from .classifier import maybe_predict, training_sampling
 
 DETECTORS = [
     ('text_consistency', text.analyze),
@@ -20,19 +20,56 @@ DETECTORS = [
 ]
 
 
+def warm_up_models():
+    """Load optional models before any video is decoded.
+
+    On Windows, initializing PaddleOCR after OpenCV has decoded frames leaves the
+    process unable to touch the filesystem (WinError 6714), so every later video
+    fails. Loading the models first avoids it. Failures are left for the
+    detectors to report as not_available.
+    """
+    from .config import ENABLE_OCR, ENABLE_DEPTH
+    if ENABLE_OCR:
+        try:
+            text.get_ocr()
+        except Exception:
+            pass
+    if ENABLE_DEPTH:
+        try:
+            depth.get_depth_model()
+        except Exception:
+            pass
+
+
 def analyze_file(path, artifact_dir=None, sampling=None, analyzer_cache=None):
     if artifact_dir is not None:
         artifact_dir = Path(artifact_dir)
     outputs = {}
     saved_artifacts = []
     counts = {}
+    # Detectors usually share a sampling profile, so decode each profile only once
+    decoded = {}
+
+    def frames_for(profile):
+        key = tuple(sorted(profile.items()))
+        if key not in decoded:
+            try:
+                decoded[key] = sample_frames(path, **profile)
+            except Exception as exc:
+                decoded[key] = exc
+        if isinstance(decoded[key], Exception):
+            raise decoded[key]
+        frames, metadata = decoded[key]
+        # Fresh copies so one detector can't alter the frames another sees
+        return [Frame(time=f.time, bgr=f.bgr.copy()) for f in frames], metadata
+
     for name, function in DETECTORS:
         try:
             cached = analyzer_cache(name, None) if analyzer_cache else None
             if cached is not None and artifact_dir is None:
                 outputs[name] = cached
                 continue
-            frames, metadata = sample_frames(path, **profiles(sampling)[name])
+            frames, metadata = frames_for(profiles(sampling)[name])
             counts[name] = len(frames)
             outputs[name] = function(frames)
             outputs[name]['sampling'] = profiles(sampling)[name]
@@ -51,7 +88,8 @@ def analyze_file(path, artifact_dir=None, sampling=None, analyzer_cache=None):
     for output in outputs.values():
         apply(output)
     from .video import inspect_video
-    metadata = inspect_video(path, max_duration_seconds=(sampling or {}).get('max_duration_seconds',180))
+    max_duration = max(p.get('max_duration_seconds', 180) for p in profiles(sampling).values())
+    metadata = inspect_video(path, max_duration_seconds=max_duration)
     timeline = sorted([dict(event, detector=name)
                        for name, result in outputs.items() for event in result['events']],
                       key=lambda event: event['timestamp'])
@@ -72,7 +110,7 @@ def analyze_job(job_id):
         return
     try:
         update_job(job_id, status='running')
-        result = analyze_file(job['path'], STORAGE_DIR / 'artifacts' / job_id)
+        result = analyze_file(job['path'], STORAGE_DIR / 'artifacts' / job_id, sampling=training_sampling())
         update_job(job_id, status='completed', result=result)
     except Exception as exc:
         traceback.print_exc()

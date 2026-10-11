@@ -19,9 +19,9 @@ from pathlib import Path
 from uuid import uuid4
 
 from app.features import EXPORT_COLUMNS, vector_from_result
-from app.pipeline import analyze_file
+from app.pipeline import analyze_file, warm_up_models
 from app.config import ENABLE_OCR, ENABLE_DEPTH, DEPTH_MODEL
-from app.preprocessing import contract, profiles, VERSIONS
+from app.preprocessing import contract, profiles, VERSIONS, MOTION_ANALYZERS
 
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.m4v', '.webm', '.avi', '.mkv'}
 DB_DEFAULT = Path('data/genbuster_index.sqlite3')
@@ -174,7 +174,8 @@ def config_signature(sampling):
 
 def extract(db, *, root=None, limit=None, sample_fps=None, max_frames=None,
             frame_width=None, max_duration=180, allow_disabled_models=False,
-            retry_failed=False, partition=0, partitions=1, manifest=None):
+            retry_failed=False, partition=0, partitions=1, manifest=None,
+            motion_fps=8.0, motion_max_frames=48, motion_width=640):
     if (not ENABLE_OCR or not ENABLE_DEPTH) and not allow_disabled_models:
         raise RuntimeError('Both OCR and depth are disabled. For all FIVE features, install models and '
                            'set ENABLE_OCR=1 ENABLE_DEPTH=1; for a speed test only, '
@@ -189,16 +190,27 @@ def extract(db, *, root=None, limit=None, sample_fps=None, max_frames=None,
         root = Path(root or stored[0]).resolve()
         if not root.is_dir():
             raise ValueError(f'Missing dataset root: {root}')
-        sampling = {'sample_fps': sample_fps, 'max_frames': max_frames,
-                    'frame_width': frame_width, 'max_duration_seconds': max_duration}
-        sampling = {key:value for key,value in sampling.items() if value is not None}
+        sparse = {'sample_fps': sample_fps, 'max_frames': max_frames,
+                  'frame_width': frame_width, 'max_duration_seconds': max_duration}
+        sparse = {key:value for key,value in sparse.items() if value is not None}
+        # Optical flow and face tracking only link frames <=0.35s apart, and face needs
+        # faces >=40px, so they get dense sampling instead of the sparse settings above.
+        motion = {'sample_fps': float(motion_fps), 'max_frames': motion_max_frames,
+                  'frame_width': motion_width, 'max_duration_seconds': max_duration}
+        sampling = {name: (motion if name in MOTION_ANALYZERS else sparse) for name in VERSIONS}
         signature = config_signature(sampling)
-        conn.create_function('sample_hash',1,lambda value:hashlib.sha256(('42:'+value).encode()).hexdigest())
+        # Salted differently from hash_split's '42:<source_id>': with the same input, processing
+        # order matched split order, so every train video was done before any val/test video.
+        conn.create_function('sample_hash',1,lambda value:hashlib.sha256(('order:'+value).encode()).hexdigest())
+        # Fetch the work list up front: an open read would block this connection's writes
+        # whenever another partition process writes first ("database is locked").
         cursor = conn.execute('''SELECT relative_path, status, feature_signature FROM (
             SELECT relative_path, label, status, feature_signature,
                    ROW_NUMBER() OVER (PARTITION BY label ORDER BY sample_hash(relative_path)) AS class_index
-            FROM videos) ORDER BY class_index, label''')
+            FROM videos) ORDER BY class_index, label''').fetchall()
         success, failures, skipped = 0, 0, 0
+        print('Loading models...', flush=True)
+        warm_up_models()
         print('Processing one video at a time; progress is saved after each video.')
         started = time.time()
         manifest_paths = None
@@ -269,18 +281,26 @@ def extract(db, *, root=None, limit=None, sample_fps=None, max_frames=None,
         conn.close()
 
 
-def export_features(db, out):
+def export_features(db, out, latest_config=False):
     conn = db_open(db)
     out.parent.mkdir(parents=True, exist_ok=True)
     n = 0
     try:
+        only_signature = None
+        if latest_config:
+            # Keep rows extracted with the most recent configuration so a partial re-extraction
+            # isn't mixed with older rows (the trainer rejects mixed configurations).
+            row = conn.execute('''SELECT feature_signature FROM videos WHERE status='completed'
+                ORDER BY updated_at DESC LIMIT 1''').fetchone()
+            only_signature = row[0] if row else None
         with out.open('w', newline='', encoding='utf8') as fh:
             writer = csv.DictWriter(fh, fieldnames=EXPORT_COLUMNS)
             writer.writeheader()
             for relative, source, gen, split, label, signature, feature_text in conn.execute('''
                    SELECT relative_path, source_id, generator, split, label, feature_signature, features
                    FROM videos WHERE status='completed' AND features IS NOT NULL
-                   ORDER BY relative_path'''):
+                   AND (? IS NULL OR feature_signature = ?)
+                   ORDER BY relative_path''', (only_signature, only_signature)):
                 vals = json.loads(feature_text)
                 writer.writerow({'video_path': relative, 'source_id': source,
                     'generator': gen, 'split': split, 'label': label,
@@ -324,6 +344,11 @@ def main():
     ex.add_argument('--max-frames', type=int)
     ex.add_argument('--frame-width', type=int)
     ex.add_argument('--max-duration', type=int, default=180)
+    ex.add_argument('--motion-fps', type=float, default=8.0,
+                    help='sampling rate for optical flow and face (they need frames <=0.35s apart)')
+    ex.add_argument('--motion-max-frames', type=int, default=48)
+    ex.add_argument('--motion-width', type=int, default=640,
+                    help='frame width for optical flow and face (faces must be >=40px)')
     ex.add_argument('--allow-disabled-models', action='store_true')
     ex.add_argument('--retry-failed', action='store_true')
     ex.add_argument('--partition', type=int, default=0)
@@ -331,6 +356,8 @@ def main():
     ep = sub.add_parser('export', help='write compact labeled features CSV')
     ep.add_argument('--db', type=Path, default=DB_DEFAULT)
     ep.add_argument('--out', type=Path, default=Path('video_features.csv'))
+    ep.add_argument('--latest-config', action='store_true',
+                    help='only export rows extracted with the most recent configuration')
     sp = sub.add_parser('stats', help='count videos and processing states')
     sp.add_argument('--db', type=Path, default=DB_DEFAULT)
     args = parser.parse_args()
@@ -341,10 +368,12 @@ def main():
         extract(args.db, root=args.root, limit=args.limit, sample_fps=args.sample_fps,
                 max_frames=args.max_frames, frame_width=args.frame_width,
                 max_duration=args.max_duration, allow_disabled_models=args.allow_disabled_models,
+                motion_fps=args.motion_fps, motion_max_frames=args.motion_max_frames,
+                motion_width=args.motion_width,
                 retry_failed=args.retry_failed, partition=args.partition,
                 partitions=args.partitions, manifest=args.manifest)
     elif args.command == 'export':
-        export_features(args.db, args.out)
+        export_features(args.db, args.out, args.latest_config)
     elif args.command == 'stats':
         stats(args.db)
 

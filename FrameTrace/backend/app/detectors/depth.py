@@ -8,17 +8,28 @@ from ..config import ENABLE_DEPTH, DEPTH_MODEL
 
 @lru_cache(maxsize=1)
 def get_depth_model():
+    import torch
     from transformers import pipeline
-    return pipeline('depth-estimation', model=DEPTH_MODEL)
+    device = 0 if torch.cuda.is_available() else -1
+    return pipeline('depth-estimation', model=DEPTH_MODEL, device=device)
 
 
-def estimate_depth(bgr):
-    img = Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
-    value = get_depth_model()(img)['predicted_depth']
+def _to_depth_map(value, bgr):
     if hasattr(value, 'detach'):
         value = value.detach().cpu().numpy()
     arr = np.asarray(value, dtype=np.float32).squeeze()
     return cv2.resize(arr, (bgr.shape[1], bgr.shape[0]), interpolation=cv2.INTER_LINEAR)
+
+
+def estimate_depth(bgr):
+    return estimate_depths([bgr])[0]
+
+
+def estimate_depths(bgrs, batch_size=16):
+    """Run the depth model on many frames at once; far faster on a GPU than one at a time."""
+    images = [Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)) for bgr in bgrs]
+    results = get_depth_model()(images, batch_size=batch_size)
+    return [_to_depth_map(result['predicted_depth'], bgr) for result, bgr in zip(results, bgrs)]
 
 
 def relative_depth_warp_error(frame_a, frame_b, depth_a, depth_b):
@@ -70,14 +81,12 @@ def analyze(frames):
         get_depth_model()
     except Exception as exc:
         return response('depth_consistency', 'not_available', note=f'Depth model initialization failed: {exc}')
-    # Only every third sampled frame; depth inference is expensive on CPU.
-    subsample = frames
+    try:
+        depths = estimate_depths([f.bgr for f in frames])
+    except Exception as exc:
+        return response('depth_consistency', 'error', note=f'Depth inference failed: {exc}')
     errors, events, previous = [], [], None
-    for f in subsample:
-        try:
-            depth = estimate_depth(f.bgr)
-        except Exception as exc:
-            return response('depth_consistency', 'error', note=f'Depth inference failed: {exc}')
+    for f, depth in zip(frames, depths):
         if previous is not None:
             prior_frame, prior_depth = previous
             err = relative_depth_warp_error(prior_frame.bgr, f.bgr, prior_depth, depth)

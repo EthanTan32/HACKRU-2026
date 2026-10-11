@@ -15,11 +15,11 @@ FrameTrace is a React + FastAPI application with six temporal video analyzers an
 
 ## Requirements
 
-- Python **3.13 recommended** for the full optional stack. PaddlePaddle could not install in the original Python 3.14 Windows environment. Wheel availability varies by operating system.
+- Python **3.11** (tested with 3.11.7). PaddlePaddle could not install in the original Python 3.14 Windows environment. Wheel availability varies by operating system.
 - Node.js **20 or newer**, with 22 recommended, and npm. The checked-in lockfile includes Tailwind dependencies requiring Node 20+.
 - Internet access for dependency installation and model downloads. FFmpeg on PATH is useful for broader codec support.
 
-All commands start from this repository's `FrameTrace` directory. Source, manifests, frontend lockfile, tests, and model download instructions are included. Virtual environments, dependencies, datasets, uploads, trained models, and runtime caches are generated locally and excluded from Git.
+All commands start from this repository's `FrameTrace` directory. Source, manifests, frontend lockfile, tests, and model download instructions are included. Virtual environments, dependencies, datasets, uploads, and runtime caches are generated locally and excluded from Git. The one exception is the trained classifier `backend/data/classifier_v4.joblib` (see [Use the trained classifier](#use-the-trained-classifier)).
 
 ## Start on Windows PowerShell
 
@@ -27,7 +27,7 @@ Backend terminal:
 
 ```powershell
 cd backend
-py -3.13 -m venv .venv
+py -3.11 -m venv .venv
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip
 & .\.venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-training.txt
 $env:ENABLE_OCR = '0'
@@ -51,7 +51,7 @@ Backend terminal:
 
 ```sh
 cd backend
-python3.13 -m venv .venv
+python3.11 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install -r requirements.txt -r requirements-training.txt
 export ENABLE_OCR=0 ENABLE_DEPTH=0 ENABLE_FACE=0
@@ -120,7 +120,7 @@ python train_classifier.py data/genbuster_features.csv --output data/classifier.
 
 Replace `python` with `.venv/bin/python` on macOS/Linux or `& .\.venv\Scripts\python.exe` in PowerShell. Use your actual dataset and metadata paths. Enable OCR/depth before extraction; enable face for a six-analyzer experiment. For a core-only smoke test, `extract --allow-disabled-models --limit 100` marks disabled features unavailable. `--limit` caps the selected dataset, including already completed selected clips when resuming. Completed work with the same contract is reused.
 
-Training compares calibrated logistic regression, random forest, and XGBoost and writes test metrics plus analyzer ablations. No compatible pretrained classifier is bundled. See the [implementation report](docs/IMPLEMENTATION_REPORT.md) for exact reproduction, larger balanced experiments, reference calibration, and generator holdout commands.
+Training compares calibrated logistic regression, random forest, and XGBoost and writes test metrics plus analyzer ablations. See the [implementation report](docs/IMPLEMENTATION_REPORT.md) for exact reproduction, larger balanced experiments, reference calibration, and generator holdout commands.
 
 To load a **trusted** classifier, reproduce its exact training contract in the backend environment, then set its path before starting the server:
 
@@ -133,6 +133,30 @@ export CLASSIFIER_PATH="$PWD/data/classifier.joblib"
 ```
 
 Joblib files can execute code during loading; use models you trained or trust. An incompatible artifact returns `model_unavailable` with an explanation. Fewer than three usable analyzers yields `insufficient_evidence`; probabilities between 0.35 and 0.65 yield `uncertain`. These policies require independent evaluation. Omit `CLASSIFIER_PATH` for diagnostics mode.
+
+## Use the trained classifier
+
+`backend/data/classifier_v4.joblib` is checked in. It was trained on 2,000 GenBuster-200K-mini clips (1,635 train / 169 val / 196 test) with all six analyzers and anomaly calibration, scoring 82% test accuracy (AUROC 0.91) on that small test set. It only loads when the backend reproduces its extraction contract exactly:
+
+- OCR, depth and face enabled, with the face model from `download_face_model.py` (see [Enable OCR, depth, and facial consistency](#enable-ocr-depth-and-facial-consistency)).
+- `ANOMALY_REFERENCE_PATH` pointing at the anomaly reference built for it (`backend/data/anomaly_reference.json`, created with `calibrate_anomalies.py`).
+- Upload sampling is read from the model automatically (sparse 1 FPS/16 frames/320 px; optical flow and face 8 FPS/48 frames/640 px).
+
+From `backend`, Windows PowerShell:
+
+```powershell
+$env:ENABLE_OCR = '1'
+$env:ENABLE_DEPTH = '1'
+$env:ENABLE_FACE = '1'
+$env:FACE_MODEL_PATH = (Resolve-Path .\data\modelsace_landmarker.task).Path
+$env:ANOMALY_REFERENCE_PATH = (Resolve-Path .\datanomaly_reference.json).Path
+$env:CLASSIFIER_PATH = (Resolve-Path .\data\classifier_v4.joblib).Path
+& .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+If any setting differs, results show `model_unavailable` with the reason. The face model is recorded by its checksum and its path relative to `backend` (`data/models/face_landmarker.task`), so it must be downloaded to that location.
+
+With `paddlepaddle-gpu` on Windows, install `nvidia-cudnn-cu12==9.7.1.26` so Paddle's cuDNN matches PyTorch's; pip then warns that Paddle expects 9.5, which is expected.
 
 ## Verify a checkout
 

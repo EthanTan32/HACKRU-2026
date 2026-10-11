@@ -3,3 +3,6 @@ __pycache__/
 *.py[cod]
 .DS_Store
 /local
+# Extraction run logs
+extract_*.log
+extract_*.err

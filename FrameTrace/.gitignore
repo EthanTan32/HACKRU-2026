@@ -4,7 +4,7 @@ __pycache__/
 .venv*/
 *.pyc
 *.egg-info/
-backend/data/
+backend/data/*
 frontend/node_modules/
 frontend/dist/
 frontend/*.tsbuildinfo
@@ -17,5 +17,8 @@ frontend/*.tsbuildinfo
 *.sqlite3-shm
 *.sqlite3-wal
 video_features.csv
-backend/data/
+backend/data/*
 datasets/
+# Keep the trained classifier and its anomaly reference in the repo (data/ is otherwise ignored; slow to rebuild)
+!backend/data/classifier_v4.joblib
+!backend/data/anomaly_reference.json

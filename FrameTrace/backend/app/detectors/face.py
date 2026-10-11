@@ -28,11 +28,16 @@ def shape_error(a,b):
 def analyze(frames):
     if os.getenv('ENABLE_FACE','0')!='1':
         return response('facial_consistency','not_enabled',note='Install MediaPipe and configure ENABLE_FACE=1 and FACE_MODEL_PATH.')
+    model_path=os.getenv('FACE_MODEL_PATH','')
+    if not model_path or not os.path.isfile(model_path):
+        return response('facial_consistency','not_available',
+                        note='ENABLE_FACE=1 but FACE_MODEL_PATH is unset or not a file; run '
+                             'python download_face_model.py and set FACE_MODEL_PATH to the .task file.')
     try:
         import mediapipe as mp
         from mediapipe.tasks import python
         from mediapipe.tasks.python import vision
-        options = vision.FaceLandmarkerOptions(base_options=python.BaseOptions(model_asset_path=os.environ['FACE_MODEL_PATH']),
+        options = vision.FaceLandmarkerOptions(base_options=python.BaseOptions(model_asset_path=model_path),
             running_mode=vision.RunningMode.VIDEO,num_faces=4,min_face_detection_confidence=.7,
             min_face_presence_confidence=.7,min_tracking_confidence=.7,
             output_face_blendshapes=True,output_facial_transformation_matrixes=True)

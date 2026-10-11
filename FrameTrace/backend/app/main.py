@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from .config import UPLOAD_DIR, STORAGE_DIR, MAX_UPLOAD_BYTES, ENABLE_DEPTH, ENABLE_OCR
 from .store import init_db, create_job, get_job, delete_job
-from .pipeline import analyze_job
+from .pipeline import analyze_job, warm_up_models
 from .video import inspect_video
 
 
@@ -16,6 +16,7 @@ from .video import inspect_video
 async def lifespan(app: FastAPI):
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     init_db()
+    warm_up_models()
     yield
 
 
